@@ -1,0 +1,218 @@
+````skill
+---
+name: laravel-general
+description: Core Laravel development principles, conventions, project structure, and philosophy. Activates for any Laravel-related coding task including creating controllers, models, routes, middleware, and general PHP development within a Laravel project.
+---
+
+# Laravel General Best Practices
+
+You are an expert Laravel developer. Follow these principles and conventions in ALL Laravel code you write, review, or modify.
+
+## Core Philosophy
+
+1. **Follow Laravel conventions** — Don't fight the framework. Use built-in features before reaching for third-party packages or custom solutions.
+2. **Fat models, skinny controllers** — Business logic belongs in models, services, or actions — NOT in controllers.
+3. **DRY (Don't Repeat Yourself)** — Extract reusable logic into traits, services, helpers, or base classes.
+4. **Convention over configuration** — Use Laravel's default naming, folder structure, and patterns unless there's a compelling reason not to.
+5. **Use the latest Laravel features** — Always prefer modern Laravel syntax and features (e.g., Enums, typed properties, match expressions, named arguments).
+
+## Project Structure
+
+Always follow this standard Laravel project structure with the following additions:
+
+```
+app/
+├── Actions/              # Single-purpose action classes
+├── Console/
+│   └── Commands/
+├── DTOs/                 # Data Transfer Objects
+├── Enums/                # PHP 8.1+ Enums
+├── Events/
+├── Exceptions/
+├── Http/
+│   ├── Controllers/
+│   ├── Middleware/
+│   ├── Requests/         # Form Request classes (validation)
+│   └── Resources/        # API Resources
+├── Jobs/
+├── Listeners/
+├── Mail/
+├── Models/
+├── Notifications/
+├── Observers/
+├── Policies/
+├── Providers/
+├── Rules/                # Custom validation rules
+├── Services/             # Business logic service classes
+├── Traits/
+└── View/
+    └── Components/       # Blade view components
+```
+
+## General Rules
+
+### Use Strict Types
+
+Always declare strict types at the top of every PHP file:
+
+```php
+<?php
+
+declare(strict_types=1);
+```
+
+### Type Everything
+
+- Always use return types on methods
+- Always use typed parameters
+- Always use typed properties
+- Use union types when necessary (`string|int`)
+- Use nullable types with `?` prefix when a value can be null
+- Use `void` return type when a method doesn't return anything
+
+```php
+// GOOD
+public function findUser(int $id): ?User
+{
+    return User::find($id);
+}
+
+// BAD — no types
+public function findUser($id)
+{
+    return User::find($id);
+}
+```
+
+### Use PHP 8.1+ Features
+
+- **Enums** instead of constants for fixed sets of values
+- **Readonly properties** for immutable data
+- **Named arguments** for clarity when calling functions with many parameters
+- **Match expressions** instead of switch statements
+- **Fiber** for async when appropriate
+- **Constructor property promotion**
+- **First-class callable syntax** `$this->method(...)`
+- **Intersection types** when needed
+- **`never` return type** for methods that always throw
+
+### Controllers
+
+- Keep controllers thin — 5 methods max (index, show, store, update, destroy)
+- Use **single-action controllers** (`__invoke`) when a controller has only one method
+- Always use **Form Requests** for validation — never validate in controllers
+- Always use **API Resources** for response transformation
+- Use **route model binding** instead of manual model fetching
+- Group related functionality into **resource controllers**
+
+```php
+// GOOD — thin controller with dependency injection
+class UserController extends Controller
+{
+    public function __construct(
+        private readonly UserService $userService,
+    ) {}
+
+    public function store(StoreUserRequest $request): JsonResponse
+    {
+        $user = $this->userService->create($request->validated());
+
+        return UserResource::make($user)
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
+    }
+}
+```
+
+### Routing
+
+- Use **resource routes** when possible: `Route::resource('users', UserController::class)`
+- Use **route groups** with common middleware and prefixes
+- Use **route names** for all routes: `->name('users.store')`
+- Use **route model binding** for all model parameters
+- Prefer **API resource routes** for API endpoints: `Route::apiResource()`
+- Keep route files organized — split into separate files for web, API, admin, etc.
+
+### Configuration
+
+- Never call `env()` outside of config files — always use `config()` helper
+- Create custom config files for application-specific settings
+- Use `.env` for environment-specific values only
+
+```php
+// GOOD
+config('app.timezone')
+
+// BAD — never use env() outside config files
+env('APP_TIMEZONE')
+```
+
+### Error Handling
+
+- Use custom exception classes for domain-specific errors
+- Always handle exceptions gracefully — never show raw exceptions to users
+- Use Laravel's exception handler for global error handling
+- Return appropriate HTTP status codes
+- Log errors with context
+
+```php
+class InsufficientBalanceException extends DomainException
+{
+    public function __construct(
+        public readonly float $balance,
+        public readonly float $amount,
+    ) {
+        parent::__construct("Insufficient balance: {$balance}, required: {$amount}");
+    }
+}
+```
+
+### Naming Conventions Quick Reference
+
+| What | Convention | Example |
+|------|-----------|---------|
+| Controller | singular, PascalCase, suffix `Controller` | `UserController` |
+| Model | singular, PascalCase | `User`, `BlogPost` |
+| Migration | snake_case, descriptive | `create_users_table` |
+| Method | camelCase, verb first | `getActiveUsers()` |
+| Variable | camelCase | `$activeUsers` |
+| Route named | dot notation, lowercase | `users.store` |
+| Config key | snake_case | `app.timezone` |
+| Trait | adjective or PascalCase | `HasFactory`, `Searchable` |
+| Interface | PascalCase, suffix `Interface` or adjective | `PaymentGatewayInterface` |
+| Enum | singular PascalCase, cases PascalCase | `UserStatus::Active` |
+| Event | past tense PascalCase | `OrderPlaced` |
+| Listener | PascalCase, descriptive | `SendOrderNotification` |
+| Job | PascalCase, descriptive | `ProcessPayment` |
+| Mail | PascalCase | `WelcomeEmail` |
+| Notification | PascalCase | `InvoicePaid` |
+| Form Request | PascalCase, prefix verb | `StoreUserRequest`, `UpdateUserRequest` |
+| Resource | singular PascalCase, suffix `Resource` | `UserResource` |
+| Seeder | PascalCase, suffix `Seeder` | `UserSeeder` |
+| Factory | PascalCase, suffix `Factory` | `UserFactory` |
+| Policy | singular PascalCase, suffix `Policy` | `UserPolicy` |
+| Rule | PascalCase | `ValidPhoneNumber` |
+| Service | PascalCase, suffix `Service` | `PaymentService` |
+| Action | PascalCase, verb prefix | `CreateUser`, `SendInvoice` |
+| DTO | PascalCase, suffix `Data` or `DTO` | `UserData`, `CreateUserDTO` |
+
+### Use Laravel Helpers and Features
+
+- Use `str()` / `Str::` for string manipulation
+- Use `collect()` / `Collection` methods instead of raw array functions
+- Use `Carbon` for all date/time operations
+- Use `Arr::` helper for array operations
+- Use `data_get()` / `data_set()` for nested array access
+- Use `optional()` or null safe operator `?->` to avoid null checks
+- Use `blank()` / `filled()` for checking empty values
+- Use `rescue()` for graceful error handling in non-critical operations
+
+### Comments and Documentation
+
+- Write **docblocks** for public methods that aren't self-documenting
+- Use `@throws` annotation when a method can throw exceptions
+- Don't comment obvious code — write self-documenting code instead
+- Use `// TODO:` and `// FIXME:` for things that need attention
+- Write clear commit messages following conventional commits
+
+````
