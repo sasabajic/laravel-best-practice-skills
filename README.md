@@ -29,17 +29,17 @@ Once installed, these skills are automatically activated when you work on Larave
 ### Option 1: Install all skills globally (recommended)
 
 ```bash
-npx skills add your-username/laravel-best-practice-skills@laravel-general -g -y
-npx skills add your-username/laravel-best-practice-skills@laravel-architecture -g -y
-npx skills add your-username/laravel-best-practice-skills@laravel-eloquent-database -g -y
-npx skills add your-username/laravel-best-practice-skills@laravel-api -g -y
-npx skills add your-username/laravel-best-practice-skills@laravel-testing -g -y
-npx skills add your-username/laravel-best-practice-skills@laravel-security -g -y
-npx skills add your-username/laravel-best-practice-skills@laravel-performance -g -y
-npx skills add your-username/laravel-best-practice-skills@laravel-frontend -g -y
-npx skills add your-username/laravel-best-practice-skills@laravel-code-style -g -y
-npx skills add your-username/laravel-best-practice-skills@laravel-deployment -g -y
-npx skills add your-username/laravel-best-practice-skills@ai-memory -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-general -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-architecture -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-eloquent-database -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-api -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-testing -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-security -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-performance -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-frontend -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-code-style -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-deployment -g -y
+npx skills add sasabajic/laravel-best-practice-skills@ai-memory -g -y
 ```
 
 ### Option 2: Install individual skills
@@ -47,7 +47,7 @@ npx skills add your-username/laravel-best-practice-skills@ai-memory -g -y
 Pick only the skills you need:
 
 ```bash
-npx skills add your-username/laravel-best-practice-skills@laravel-architecture -g -y
+npx skills add sasabajic/laravel-best-practice-skills@laravel-architecture -g -y
 ```
 
 ### Option 3: Manual installation
@@ -94,6 +94,8 @@ The key is that instructions are explicit, specific, and example-driven — whic
 
 - [https://bscomputer.com](https://bscomputer.com)
 - [https://bscsolutions.rs](https://bscsolutions.rs)
+- [https://sasabajic.com](https://sasabajic.com)
+- GitHub: [https://github.com/sasabajic/laravel-best-practice-skills](https://github.com/sasabajic/laravel-best-practice-skills)
 
 ## Contributing
 
