@@ -54,15 +54,15 @@ npx skills add sasabajic/laravel-best-practice-skills@laravel-architecture -g -y
 
 ### Option 3: Manual installation (clone & copy)
 
-Napravio sam set skillova za GitHub Copilot i Laravel. Evo kako da ih instaliraš ručno:
+A curated set of skills for GitHub Copilot and Laravel. Here's how to install them manually:
 
-**1.** Kloniraj repo negde kod sebe:
+**1.** Clone the repo to a local directory:
 
 ```bash
 git clone https://github.com/sasabajic/laravel-best-practice-skills.git
 ```
 
-**2.** Prekopiraj **sve** iz dobijenog foldera (uključujući skrivene `.` foldere — potrebno za `git pull` update kasnije) u Copilot skills direktorijum:
+**2.** Copy **everything** from the cloned folder (including hidden `.` folders — required for `git pull` updates later) into the Copilot skills directory:
 
 ```bash
 # Windows (PowerShell)
@@ -75,14 +75,14 @@ xcopy /E /H /Y "laravel-best-practice-skills\*" "%USERPROFILE%\.copilot\skills\l
 cp -r laravel-best-practice-skills/ ~/.copilot/skills/laravel-best-practice-skills/
 ```
 
-**3.** Kad izađu nove verzije skillova, samo uđi u taj folder i povuci update:
+**3.** When new skill versions are released, navigate to the folder and pull updates:
 
 ```bash
 cd %USERPROFILE%\.copilot\skills\laravel-best-practice-skills
 git pull
 ```
 
-> **Napomena:** Bitno je da se kopira ceo folder sa `.git` direktorijumom kako bi `git pull` radio za buduće updateove.
+> **Note:** Make sure to copy the entire folder including the `.git` directory so that `git pull` works for future updates.
 
 ## How It Works
 

@@ -39,7 +39,7 @@ Look for:
 3. Generate at minimum: `docs/ARCHITECTURE.md` and `docs/DATABASE.md`
 4. Generate `docs/API.md` if the project has API routes
 5. Generate `docs/FEATURES.md` with a list of identified features
-6. Inform the user: "Kreirao sam `docs/` folder sa tehničkom dokumentacijom projekta. Pogledaj generisane fajlove i javi ako nešto treba korigovati."
+6. Inform the user: "I created the `docs/` folder with the project's technical documentation. Please review the generated files and let me know if anything needs adjustment."
 
 If the `docs/` folder exists but is incomplete (e.g., missing DATABASE.md), generate the missing files and update existing ones if they're outdated.
 
@@ -541,7 +541,7 @@ When the user asks to commit/push/merge:
 ### Example
 
 ```
-User: "commituj ovo"
+User: "commit this"
 
 AI thinking:
 - git diff shows: app/Models/Order.php, database/migrations/xxx_add_status_to_orders.php, routes/api.php
@@ -553,6 +553,6 @@ AI thinking:
 - Then commit everything together
 ```
 
-> **Exception:** If the user explicitly says to skip docs (e.g., "commit bez docs", "brzi commit"), add `[skip-docs]` to the commit message as a reminder to update later.
+> **Exception:** If the user explicitly says to skip docs (e.g., "commit without docs", "quick commit"), add `[skip-docs]` to the commit message as a reminder to update later.
 
 ````

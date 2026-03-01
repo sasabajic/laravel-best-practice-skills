@@ -11,12 +11,12 @@ This skill helps you capture coding patterns, conventions, and rules from the cu
 ## When to Activate
 
 Activate when the user says things like:
-- "Sačuvaj ovo pravilo" / "Save this rule"
-- "Zapamti ovaj pattern" / "Remember this pattern"
-- "Dodaj ovo u skill" / "Add this to my skills"
-- "Izvezi ovo" / "Export this"
-- "Kreiraj skill za ovo" / "Create a skill for this"
-- "Sumarizuj šta smo naučili" / "Summarize what we learned"
+- "Save this rule"
+- "Remember this pattern"
+- "Add this to my skills"
+- "Export this"
+- "Create a skill for this"
+- "Summarize what we learned"
 
 ## How to Capture a Skill
 

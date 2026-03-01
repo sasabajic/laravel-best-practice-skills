@@ -23,7 +23,7 @@ Look for: .ai/memory.md in the project root
 2. Check the `## Work In Progress` section
 3. If there is unfinished work recorded:
    - **Show the user** what was being worked on and where it stopped
-   - **Ask:** "Pronašao sam zabelešku da se radilo na: [task description]. Poslednji status: [status]. Da li želiš da nastavimo odatle ili da radimo nešto drugo?"
+   - **Ask:** "I found a record of unfinished work: [task description]. Last status: [status]. Would you like to continue from where we left off, or start something new?"
    - Wait for user's decision before proceeding
 4. If no unfinished work, greet and proceed normally
 
@@ -31,7 +31,7 @@ Look for: .ai/memory.md in the project root
 1. Create `.ai/` directory and `.ai/memory.md`
 2. Initialize with the template below
 3. Populate project info by analyzing the project
-4. Inform the user: "Kreirao sam AI memoriju za ovaj projekat (.ai/memory.md). Ovde čuvam kontekst o projektu i napredak rada kako bismo imali kontinuitet između sesija."
+4. Inform the user: "I created an AI memory file for this project (.ai/memory.md). This stores project context and work progress to maintain continuity across sessions."
 
 ### 2. Add `.ai/` to `.gitignore`
 
@@ -42,7 +42,7 @@ Check if `.ai/` is in `.gitignore`. If not, add it:
 .ai/
 ```
 
-> **Razlog:** Memorija je specifična za razvojno okruženje, ne treba da bude u git-u.
+> **Reason:** The memory file is specific to the development environment and should not be tracked in git.
 
 ---
 

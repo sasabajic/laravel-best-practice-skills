@@ -139,7 +139,7 @@ After memory check, version check, and MCP setup, perform a full project analysi
 3. Review the project structure and identify patterns used
 4. Note any deviations from Laravel conventions
 5. **Check if `docs/` folder exists with technical documentation**
-   - **If missing → CREATE IT immediately.** Do not just offer — create the folder and generate the initial documentation (ARCHITECTURE.md, DATABASE.md at minimum). Inform the user: "Kreirao sam `docs/` folder sa tehničkom dokumentacijom projekta."
+   - **If missing → CREATE IT immediately.** Do not just offer — create the folder and generate the initial documentation (ARCHITECTURE.md, DATABASE.md at minimum). Inform the user: "I created the `docs/` folder with the project's technical documentation."
    - **If exists but incomplete** → identify missing docs and generate them
    - **If exists and complete** → read it to understand the project context
 6. Suggest improvements based on the skills in this collection
