@@ -56,33 +56,53 @@ npx skills add sasabajic/laravel-best-practice-skills@laravel-architecture -g -y
 
 A curated set of skills for GitHub Copilot and Laravel. Here's how to install them manually:
 
-**1.** Clone the repo to a local directory:
+**1.** Clone the repo to any local directory:
 
 ```bash
 git clone https://github.com/sasabajic/laravel-best-practice-skills.git
 ```
 
-**2.** Copy **everything** from the cloned folder (including hidden `.` folders — required for `git pull` updates later) into the Copilot skills directory:
+**2.** Copy the **contents** of the cloned folder (all skill folders + hidden `.git` directory) directly into the Copilot skills directory:
 
 ```bash
 # Windows (PowerShell)
-Copy-Item -Path ".\laravel-best-practice-skills\*" -Destination "$env:USERPROFILE\.copilot\skills\laravel-best-practice-skills" -Recurse -Force
+Copy-Item -Path ".\laravel-best-practice-skills\*" -Destination "$env:USERPROFILE\.copilot\skills\" -Recurse -Force
 
 # Windows (CMD)
-xcopy /E /H /Y "laravel-best-practice-skills\*" "%USERPROFILE%\.copilot\skills\laravel-best-practice-skills\"
+xcopy /E /H /Y "laravel-best-practice-skills\*" "%USERPROFILE%\.copilot\skills\"
 
 # macOS / Linux
-cp -r laravel-best-practice-skills/ ~/.copilot/skills/laravel-best-practice-skills/
+cp -r laravel-best-practice-skills/* ~/.copilot/skills/
+cp -r laravel-best-practice-skills/.git ~/.copilot/skills/
 ```
 
-**3.** When new skill versions are released, navigate to the folder and pull updates:
+The result should look like this:
+
+```
+~/.copilot/skills/
+├── laravel-general/SKILL.md
+├── laravel-architecture/SKILL.md
+├── laravel-api/SKILL.md
+├── ai-memory/SKILL.md
+├── ... (other skill folders)
+├── .git/                          ← enables git pull for updates
+├── README.md
+└── LICENSE
+```
+
+> **Important:** Skill folders must be directly inside `skills/`, NOT nested in a subfolder. Copilot expects the structure `skills/[skill-name]/SKILL.md`.
+
+**3.** When new skill versions are released, navigate to the skills folder and pull updates:
 
 ```bash
-cd %USERPROFILE%\.copilot\skills\laravel-best-practice-skills
+# Windows
+cd %USERPROFILE%\.copilot\skills
+git pull
+
+# macOS / Linux
+cd ~/.copilot/skills
 git pull
 ```
-
-> **Note:** Make sure to copy the entire folder including the `.git` directory so that `git pull` works for future updates.
 
 ## How It Works
 
