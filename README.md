@@ -27,34 +27,36 @@ Once installed, these skills are automatically activated when you work on Larave
 
 ## Installation
 
-### Option 1: Install all skills globally (recommended)
+### Option 1: One-command install (recommended)
+
+Run a single command to install all skills automatically:
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/sasabajic/laravel-best-practice-skills/main/install.ps1 | iex
+```
+
+**macOS / Linux:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/sasabajic/laravel-best-practice-skills/main/install.sh | bash
+```
+
+This clones the repo, copies all skill folders into `~/.copilot/skills/`, and cleans up automatically. Run the same command again to update to the latest version.
+
+### Option 2: Install individual skills via npx
+
+If you only need specific skills, install them individually:
 
 ```bash
 npx skills add sasabajic/laravel-best-practice-skills@laravel-general -g -y
 npx skills add sasabajic/laravel-best-practice-skills@laravel-architecture -g -y
-npx skills add sasabajic/laravel-best-practice-skills@laravel-eloquent-database -g -y
-npx skills add sasabajic/laravel-best-practice-skills@laravel-api -g -y
-npx skills add sasabajic/laravel-best-practice-skills@laravel-testing -g -y
-npx skills add sasabajic/laravel-best-practice-skills@laravel-security -g -y
-npx skills add sasabajic/laravel-best-practice-skills@laravel-performance -g -y
-npx skills add sasabajic/laravel-best-practice-skills@laravel-frontend -g -y
-npx skills add sasabajic/laravel-best-practice-skills@laravel-code-style -g -y
-npx skills add sasabajic/laravel-best-practice-skills@laravel-deployment -g -y
-npx skills add sasabajic/laravel-best-practice-skills@laravel-project-docs -g -y
-npx skills add sasabajic/laravel-best-practice-skills@ai-memory -g -y
 ```
 
-### Option 2: Install individual skills
-
-Pick only the skills you need:
-
-```bash
-npx skills add sasabajic/laravel-best-practice-skills@laravel-architecture -g -y
-```
+Available skill names: `laravel-general`, `laravel-architecture`, `laravel-eloquent-database`, `laravel-api`, `laravel-testing`, `laravel-security`, `laravel-performance`, `laravel-frontend`, `laravel-code-style`, `laravel-deployment`, `laravel-project-docs`, `ai-memory`
 
 ### Option 3: Manual installation (clone & copy)
-
-A curated set of skills for GitHub Copilot and Laravel. Here's how to install them manually:
 
 **1.** Clone the repo to any local directory:
 
@@ -62,18 +64,14 @@ A curated set of skills for GitHub Copilot and Laravel. Here's how to install th
 git clone https://github.com/sasabajic/laravel-best-practice-skills.git
 ```
 
-**2.** Copy the **contents** of the cloned folder (all skill folders + hidden `.git` directory) directly into the Copilot skills directory:
+**2.** Copy the **contents** of the cloned folder directly into the Copilot skills directory:
 
 ```bash
 # Windows (PowerShell)
 Copy-Item -Path ".\laravel-best-practice-skills\*" -Destination "$env:USERPROFILE\.copilot\skills\" -Recurse -Force
 
-# Windows (CMD)
-xcopy /E /H /Y "laravel-best-practice-skills\*" "%USERPROFILE%\.copilot\skills\"
-
 # macOS / Linux
 cp -r laravel-best-practice-skills/* ~/.copilot/skills/
-cp -r laravel-best-practice-skills/.git ~/.copilot/skills/
 ```
 
 The result should look like this:
@@ -85,24 +83,11 @@ The result should look like this:
 ├── laravel-api/SKILL.md
 ├── ai-memory/SKILL.md
 ├── ... (other skill folders)
-├── .git/                          ← enables git pull for updates
 ├── README.md
 └── LICENSE
 ```
 
 > **Important:** Skill folders must be directly inside `skills/`, NOT nested in a subfolder. Copilot expects the structure `skills/[skill-name]/SKILL.md`.
-
-**3.** When new skill versions are released, navigate to the skills folder and pull updates:
-
-```bash
-# Windows
-cd %USERPROFILE%\.copilot\skills
-git pull
-
-# macOS / Linux
-cd ~/.copilot/skills
-git pull
-```
 
 ## How It Works
 
