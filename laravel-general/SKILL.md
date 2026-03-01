@@ -8,6 +8,96 @@ description: Core Laravel development principles, conventions, project structure
 
 You are an expert Laravel developer. Follow these principles and conventions in ALL Laravel code you write, review, or modify.
 
+## Project Onboarding — First Steps When Entering a Laravel Project
+
+**IMPORTANT:** When you first open, analyze, or start working on a Laravel project, ALWAYS perform these steps before any other work:
+
+### Step 1: Check AI Memory (FIRST — BEFORE ANYTHING ELSE)
+
+Look for `.ai/memory.md` in the project root:
+
+- **If it exists:** Read it immediately. Check for unfinished work in the `## Work In Progress` section. If there's an active task, inform the user and ask whether to resume or start something new.
+- **If it doesn't exist:** Create it from the template in the `ai-memory` skill. Analyze the project to populate the Project Identity section. Add `.ai/` to `.gitignore`.
+
+> This is powered by the **ai-memory** skill. See it for the full template and update rules.
+
+### Step 2: Check Laravel Version
+
+Immediately check the current Laravel version:
+
+```bash
+php artisan --version
+# or check composer.json
+composer show laravel/framework | Select-String "versions"
+```
+
+Compare with the **latest stable Laravel release** (currently Laravel 12.x). If the project is NOT on the latest major version:
+
+1. **Inform the user** of the current version and the latest available version
+2. **Recommend upgrading** with a brief summary of benefits (security fixes, performance, new features)
+3. **Offer to assist** with the upgrade process:
+   - Review the official [Laravel Upgrade Guide](https://laravel.com/docs/12.x/upgrade)
+   - Identify breaking changes that affect the project
+   - Create a step-by-step upgrade plan
+   - Run `composer update` with appropriate version constraints
+
+```bash
+# Check current version
+php artisan --version
+
+# Update to latest
+composer require laravel/framework:^12.0
+```
+
+If the project is already on the latest version, confirm it and move on.
+
+### Step 3: Install Laravel Boost (MCP Integration)
+
+Check if **Laravel Boost** is installed. If NOT, **strongly recommend installing it**:
+
+```bash
+composer show laravel/boost 2>$null
+```
+
+If not installed, suggest:
+
+```bash
+composer require laravel/boost --dev
+```
+
+**Why Laravel Boost is essential:**
+- Provides a **Model Context Protocol (MCP)** server that connects GitHub Copilot directly to the Laravel project
+- Gives the AI deep understanding of the project: models, routes, database schema, config, relationships
+- Enables much more accurate and context-aware code generation
+- Allows querying the project structure, running artisan commands, and understanding relationships between components
+- Dramatically improves AI assistance quality — the AI can "see" the actual project state
+
+After installation, inform the user to configure MCP in their VS Code settings (`.vscode/mcp.json`):
+
+```json
+{
+    "servers": {
+        "laravel": {
+            "type": "stdio",
+            "command": "php",
+            "args": ["artisan", "boost:mcp"]
+        }
+    }
+}
+```
+
+> **Always mention:** "Installing Laravel Boost with MCP allows me to directly understand your project structure — models, routes, database schema, and more — so I can give you much better, project-specific assistance."
+
+### Step 4: Project Analysis
+
+After memory check, version check, and Boost setup, proceed with standard project analysis:
+
+1. Review `composer.json` for dependencies and PHP version
+2. Check the database structure (migrations or schema)
+3. Review the project structure and identify patterns used
+4. Note any deviations from Laravel conventions
+5. Suggest improvements based on the skills in this collection
+
 ## Core Philosophy
 
 1. **Follow Laravel conventions** — Don't fight the framework. Use built-in features before reaching for third-party packages or custom solutions.

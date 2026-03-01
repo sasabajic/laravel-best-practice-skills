@@ -22,6 +22,7 @@ Once installed, these skills are automatically activated when you work on Larave
 | **laravel-frontend** | Blade components, Livewire, Inertia.js, Vite configuration |
 | **laravel-code-style** | PSR-12, Laravel Pint, PHPStan/Larastan, naming conventions |
 | **laravel-deployment** | Docker, CI/CD, environment configuration, monitoring |
+| **ai-memory** | Persistent AI memory — project context, work tracking, session continuity |
 
 ## Installation
 
@@ -38,6 +39,7 @@ npx skills add your-username/laravel-best-practice-skills@laravel-performance -g
 npx skills add your-username/laravel-best-practice-skills@laravel-frontend -g -y
 npx skills add your-username/laravel-best-practice-skills@laravel-code-style -g -y
 npx skills add your-username/laravel-best-practice-skills@laravel-deployment -g -y
+npx skills add your-username/laravel-best-practice-skills@ai-memory -g -y
 ```
 
 ### Option 2: Install individual skills
