@@ -189,6 +189,24 @@ app/
 
 ## General Rules
 
+### Language Standards
+
+**Code and documentation MUST be written in English by default.** This includes:
+
+- Variable names, function names, class names, constants
+- Database columns, table names, migration names
+- Comments and docblocks
+- Commit messages
+- Technical documentation (`docs/`, README, CHANGELOG)
+- API response messages and error keys
+- Enum values and labels (use translation files for display)
+- Test method names and descriptions
+- Config keys and values
+
+**Exception:** If the user explicitly requests a different language for documentation or code, follow their preference for that project. Record this decision in `.ai/memory.md` under "Coding Conventions (Project-Specific)".
+
+**Communication language:** The language used in conversation with the user (chat, explanations, questions) is the user's choice. If the user writes in a non-English language, respond in that same language and continue using it throughout the session. This does NOT affect code/documentation — those remain in English unless explicitly overridden.
+
 ### Always Use MCP When Available
 
 If Laravel Boost MCP and/or Herd MCP servers are connected, **use them actively throughout your work**, not just during onboarding:
