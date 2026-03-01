@@ -32,11 +32,16 @@ Look for:
 
 ### If Documentation is Missing or Incomplete
 
-**Inform the user immediately:**
+**Do NOT just ask — CREATE IT immediately:**
 
-> "Ovaj projekat nema tehničku dokumentaciju (docs/ folder ne postoji). Preporučujem da kreiramo osnovnu dokumentaciju — ovo će pomoći i meni i svakom budućem developeru da brže razume projekat. Da li želiš da analiziram projekat i generišem dokumentaciju?"
+1. Create the `docs/` folder
+2. Run a full project analysis (see Phase 1-5 below)
+3. Generate at minimum: `docs/ARCHITECTURE.md` and `docs/DATABASE.md`
+4. Generate `docs/API.md` if the project has API routes
+5. Generate `docs/FEATURES.md` with a list of identified features
+6. Inform the user: "Kreirao sam `docs/` folder sa tehničkom dokumentacijom projekta. Pogledaj generisane fajlove i javi ako nešto treba korigovati."
 
-**If the user agrees, perform a full project analysis and generate docs (see sections below).**
+If the `docs/` folder exists but is incomplete (e.g., missing DATABASE.md), generate the missing files and update existing ones if they're outdated.
 
 ---
 
@@ -485,5 +490,69 @@ When connected via MCP (Boost/Herd), **proactively use MCP tools to keep documen
 - After installing packages → update ARCHITECTURE.md tech stack
 
 > **Rule:** Treat documentation as part of the feature. A feature is not complete until its documentation is updated. When tracking progress in `.ai/memory.md`, include "Update docs" as a step in every implementation plan.
+
+---
+
+## 7. MANDATORY: Pre-Commit Documentation Sync
+
+**Before every `git commit`, `git push`, or `git merge` — update documentation FIRST.**
+
+This rule is also defined in the **laravel-general** skill as a general rule. Here is the detailed procedure:
+
+### Pre-Commit Documentation Checklist
+
+```
+Before committing, answer these questions:
+
+1. Did I create or modify any models/migrations?
+   → YES: Update docs/DATABASE.md
+
+2. Did I add or change any API endpoints/routes?
+   → YES: Update docs/API.md
+
+3. Did I install or remove a package?
+   → YES: Update docs/ARCHITECTURE.md (tech stack / key packages)
+
+4. Did I make an architecture or design decision?
+   → YES: Update docs/ARCHITECTURE.md (design decisions table)
+
+5. Did I complete or start a feature?
+   → YES: Update docs/FEATURES.md + docs/plans/[feature].md
+
+6. Did I change deployment, Docker, CI/CD config?
+   → YES: Update docs/DEPLOYMENT.md
+
+7. Did I change env variables or local setup steps?
+   → YES: Update docs/DEVELOPMENT.md
+
+If NONE of the above apply → skip docs update, proceed with git.
+```
+
+### Auto-Detection Flow
+
+When the user asks to commit/push/merge:
+
+1. Run `git diff --name-only` (or `git diff --cached --name-only` for staged files)
+2. Analyze the changed files against the checklist above
+3. Update the relevant docs
+4. Add the updated docs to the commit
+5. Proceed with the git operation
+
+### Example
+
+```
+User: "commituj ovo"
+
+AI thinking:
+- git diff shows: app/Models/Order.php, database/migrations/xxx_add_status_to_orders.php, routes/api.php
+- Order model changed → update DATABASE.md
+- New migration → update DATABASE.md
+- Routes changed → update API.md
+- Update timestamps in both files
+- Stage docs/DATABASE.md and docs/API.md
+- Then commit everything together
+```
+
+> **Exception:** If the user explicitly says to skip docs (e.g., "commit bez docs", "brzi commit"), add `[skip-docs]` to the commit message as a reminder to update later.
 
 ````

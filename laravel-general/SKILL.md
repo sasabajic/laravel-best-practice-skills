@@ -130,7 +130,7 @@ Combined config example:
 
 > **Always mention to the user:** "MCP servers (Boost and/or Herd) allow me to directly query your project — models, routes, database schema, environment, services — so I can give you much better, project-specific assistance. I strongly recommend enabling them."
 
-### Step 4: Project Analysis & Documentation Check
+### Step 4: Project Analysis & Documentation Setup
 
 After memory check, version check, and MCP setup, perform a full project analysis:
 
@@ -139,8 +139,9 @@ After memory check, version check, and MCP setup, perform a full project analysi
 3. Review the project structure and identify patterns used
 4. Note any deviations from Laravel conventions
 5. **Check if `docs/` folder exists with technical documentation**
-   - If missing → inform the user and offer to generate it (see **laravel-project-docs** skill)
-   - If exists → read it to understand the project context
+   - **If missing → CREATE IT immediately.** Do not just offer — create the folder and generate the initial documentation (ARCHITECTURE.md, DATABASE.md at minimum). Inform the user: "Kreirao sam `docs/` folder sa tehničkom dokumentacijom projekta."
+   - **If exists but incomplete** → identify missing docs and generate them
+   - **If exists and complete** → read it to understand the project context
 6. Suggest improvements based on the skills in this collection
 
 > This step is powered by the **laravel-project-docs** skill which defines the full analysis procedure, documentation templates, and feature planning workflow.
@@ -365,5 +366,32 @@ class InsufficientBalanceException extends DomainException
 - Don't comment obvious code — write self-documenting code instead
 - Use `// TODO:` and `// FIXME:` for things that need attention
 - Write clear commit messages following conventional commits
+
+### MANDATORY: Update Documentation Before Git Operations
+
+**Before every `git commit`, `git push`, or `git merge`, ALWAYS update the project documentation in `docs/` first.**
+
+This is not optional. Follow this procedure:
+
+1. **Review what changed** — identify which files were created, modified, or deleted since the last commit
+2. **Update relevant docs** based on what changed:
+
+| What Changed | Update |
+|-------------|--------|
+| New/modified model or migration | `docs/DATABASE.md` — update table schema, relationships |
+| New/modified API endpoint or route | `docs/API.md` — update endpoint list |
+| New package installed | `docs/ARCHITECTURE.md` — update tech stack / key packages |
+| Architecture decision made | `docs/ARCHITECTURE.md` — add to design decisions |
+| New feature implemented | `docs/FEATURES.md` — add/update feature entry |
+| Feature plan completed | `docs/plans/[feature].md` — set status to `completed` |
+| Deployment config changed | `docs/DEPLOYMENT.md` — update deployment info |
+| Environment/config changes | `docs/DEVELOPMENT.md` — update setup instructions |
+
+3. **Update timestamps** — change "Last updated" in any doc file you modify
+4. **Then proceed** with the git operation
+
+> **Rule:** If the user asks to commit, push, or merge — first check what has changed since the last commit and update docs accordingly. Only then execute the git operation. If nothing documentation-worthy changed (e.g., only code style fixes), skip the docs update.
+
+> **Shortcut:** If the user explicitly says "commit without docs" or is in a hurry, skip the docs update but add a `// TODO: update docs` note in the commit message.
 
 ````
