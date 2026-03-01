@@ -130,15 +130,20 @@ Combined config example:
 
 > **Always mention to the user:** "MCP servers (Boost and/or Herd) allow me to directly query your project — models, routes, database schema, environment, services — so I can give you much better, project-specific assistance. I strongly recommend enabling them."
 
-### Step 4: Project Analysis
+### Step 4: Project Analysis & Documentation Check
 
-After memory check, version check, and MCP setup, proceed with standard project analysis:
+After memory check, version check, and MCP setup, perform a full project analysis:
 
 1. Review `composer.json` for dependencies and PHP version
 2. Check the database structure (migrations or schema)
 3. Review the project structure and identify patterns used
 4. Note any deviations from Laravel conventions
-5. Suggest improvements based on the skills in this collection
+5. **Check if `docs/` folder exists with technical documentation**
+   - If missing → inform the user and offer to generate it (see **laravel-project-docs** skill)
+   - If exists → read it to understand the project context
+6. Suggest improvements based on the skills in this collection
+
+> This step is powered by the **laravel-project-docs** skill which defines the full analysis procedure, documentation templates, and feature planning workflow.
 
 ## Core Philosophy
 
