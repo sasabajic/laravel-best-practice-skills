@@ -51,28 +51,24 @@ composer require laravel/framework:^12.0
 
 If the project is already on the latest version, confirm it and move on.
 
-### Step 3: Install Laravel Boost (MCP Integration)
+### Step 3: Connect to MCP Servers (Laravel Boost & Laravel Herd)
 
-Check if **Laravel Boost** is installed. If NOT, **strongly recommend installing it**:
+**MCP (Model Context Protocol) gives the AI direct access to the project's internals.** Always check for available MCP servers and connect to them.
+
+#### Check for Laravel Boost MCP
 
 ```bash
 composer show laravel/boost 2>$null
 ```
 
-If not installed, suggest:
+- **If installed:** Immediately connect to its MCP server and use it for all subsequent work.
+- **If NOT installed:** Strongly recommend installing it:
 
 ```bash
 composer require laravel/boost --dev
 ```
 
-**Why Laravel Boost is essential:**
-- Provides a **Model Context Protocol (MCP)** server that connects GitHub Copilot directly to the Laravel project
-- Gives the AI deep understanding of the project: models, routes, database schema, config, relationships
-- Enables much more accurate and context-aware code generation
-- Allows querying the project structure, running artisan commands, and understanding relationships between components
-- Dramatically improves AI assistance quality — the AI can "see" the actual project state
-
-After installation, inform the user to configure MCP in their VS Code settings (`.vscode/mcp.json`):
+Boost MCP config for `.vscode/mcp.json`:
 
 ```json
 {
@@ -86,11 +82,57 @@ After installation, inform the user to configure MCP in their VS Code settings (
 }
 ```
 
-> **Always mention:** "Installing Laravel Boost with MCP allows me to directly understand your project structure — models, routes, database schema, and more — so I can give you much better, project-specific assistance."
+#### Check for Laravel Herd MCP
+
+Laravel Herd (Pro) also provides an MCP server. Check if the project runs under Herd:
+
+- Look for Herd indicators: `herd.yml`, Herd-managed PHP/Nginx configs, or `.config/herd-lite/config/valet`
+- If Herd is the local environment, check if the MCP server is already configured
+
+Herd MCP config for `.vscode/mcp.json`:
+
+```json
+{
+    "servers": {
+        "herd": {
+            "type": "stdio",
+            "command": "herd",
+            "args": ["mcp"]
+        }
+    }
+}
+```
+
+#### Both Can Coexist
+
+If both Boost and Herd MCP are available, **use both**. They complement each other:
+- **Boost MCP** — deep project introspection (models, routes, schema, relationships, artisan commands)
+- **Herd MCP** — local environment management (PHP versions, sites, services, databases, logs)
+
+Combined config example:
+
+```json
+{
+    "servers": {
+        "laravel": {
+            "type": "stdio",
+            "command": "php",
+            "args": ["artisan", "boost:mcp"]
+        },
+        "herd": {
+            "type": "stdio",
+            "command": "herd",
+            "args": ["mcp"]
+        }
+    }
+}
+```
+
+> **Always mention to the user:** "MCP servers (Boost and/or Herd) allow me to directly query your project — models, routes, database schema, environment, services — so I can give you much better, project-specific assistance. I strongly recommend enabling them."
 
 ### Step 4: Project Analysis
 
-After memory check, version check, and Boost setup, proceed with standard project analysis:
+After memory check, version check, and MCP setup, proceed with standard project analysis:
 
 1. Review `composer.json` for dependencies and PHP version
 2. Check the database structure (migrations or schema)
@@ -140,6 +182,20 @@ app/
 ```
 
 ## General Rules
+
+### Always Use MCP When Available
+
+If Laravel Boost MCP and/or Herd MCP servers are connected, **use them actively throughout your work**, not just during onboarding:
+
+- **Before creating models/migrations** — query existing schema and relationships via MCP
+- **Before adding routes** — check existing routes via MCP to avoid conflicts
+- **Before modifying config** — read current config values via MCP
+- **When debugging** — use MCP to inspect database state, logs, environment
+- **When writing tests** — use MCP to understand actual model structure and relationships
+- **When asked about the project** — always prefer MCP data over guessing from file reads
+- **Herd MCP** — use for PHP version checks, service management, site configuration, database access
+
+> **Rule:** If an MCP tool can answer a question or provide context, use it FIRST before reading files manually or guessing. MCP data is always more accurate and up-to-date than static file analysis.
 
 ### Use Strict Types
 
