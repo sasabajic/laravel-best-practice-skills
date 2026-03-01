@@ -385,6 +385,36 @@ class InsufficientBalanceException extends DomainException
 - Use `// TODO:` and `// FIXME:` for things that need attention
 - Write clear commit messages following conventional commits
 
+### Commented-Out Code Policy
+
+**Commented-out code is technical debt.** When you encounter commented-out code segments during development or code review, handle them as follows:
+
+1. **Identify** — scan for blocks of commented-out code (not regular comments explaining logic)
+2. **Ask the user** about each block:
+   - What is this code? Why was it commented out?
+   - Should it be deleted permanently?
+   - Is it temporarily disabled? If so, when should it be re-enabled?
+   - Is it kept for reference? If so, is there a better way to preserve it (e.g., git history)?
+
+3. **If the code should stay commented**, require a clear annotation:
+
+```php
+// DISABLED [2026-03-01]: Temporarily disabled Stripe webhook processing
+//   while migrating to new payment provider. Re-enable after PayPal
+//   integration is complete (see Issue #142).
+//   TODO: Remove this block after migration is verified in production.
+// $this->processStripeWebhook($payload);
+```
+
+4. **If the code has no valid reason to stay**, delete it. Git history preserves everything — there's no need to keep dead code in the codebase.
+
+**Rules for commented-out code:**
+- **Never leave** commented-out code without an explanation
+- **Always annotate** with: reason, date, and expected action (delete/re-enable/review)
+- **Use tags:** `// DISABLED:`, `// DEPRECATED:`, `// EXPERIMENTAL:` to categorize
+- **Proactively flag** commented-out code when reviewing or modifying nearby code
+- **During onboarding** (Step 4: Project Analysis) — scan for commented-out code and report it as part of the quality assessment
+
 ### MANDATORY: Update Documentation Before Git Operations
 
 **Before every `git commit`, `git push`, or `git merge`, ALWAYS update the project documentation in `docs/` first.**
