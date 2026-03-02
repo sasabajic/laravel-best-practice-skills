@@ -142,9 +142,16 @@ After memory check, version check, and MCP setup, perform a full project analysi
    - **If missing → CREATE IT immediately.** Do not just offer — create the folder and generate the initial documentation (ARCHITECTURE.md, DATABASE.md at minimum). Inform the user: "I created the `docs/` folder with the project's technical documentation."
    - **If exists but incomplete** → identify missing docs and generate them
    - **If exists and complete** → read it to understand the project context
-6. Suggest improvements based on the skills in this collection
+6. **Evaluate the technology stack and suggest modernization** — proactively recommend improvements:
+   - **Admin/Backend UI:** If using Bootstrap, jQuery, or a custom admin panel → suggest **Filament 3 + Livewire**
+   - **Frontend:** If using Bootstrap CSS → suggest **Tailwind CSS**; if jQuery → suggest **Livewire 3** or **Alpine.js**
+   - **Code quality:** If no code formatter → suggest **Laravel Pint**; if no static analysis → suggest **Larastan** (level 5+)
+   - **Testing:** If using PHPUnit → suggest **Pest PHP** as a modern alternative
+   - **Packages:** Evaluate if any Spatie packages (permissions, data, medialibrary) would benefit the project
+   - **Monitoring:** Suggest **Laravel Pulse** (production), **Horizon** (Redis queues), **Debugbar** (development) as appropriate
+   - Present recommendations in **priority order** (high/medium/low) — not everything at once
 
-> This step is powered by the **laravel-project-docs** skill which defines the full analysis procedure, documentation templates, and feature planning workflow.
+> This step is powered by the **laravel-project-docs** skill which defines the full analysis procedure (Phases 1-6), documentation templates, stack recommendations, and feature planning workflow.
 
 ## Core Philosophy
 

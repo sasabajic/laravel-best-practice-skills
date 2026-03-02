@@ -83,7 +83,7 @@ Collect and document the following:
 - **Laravel Version:** [from composer.json → require → laravel/framework]
 - **Database:** [from .env or config/database.php → default]
 - **Cache/Queue Driver:** [from .env → CACHE_DRIVER, QUEUE_CONNECTION]
-- **Frontend:** [Blade / Livewire / Inertia+Vue / Inertia+React / API-only]
+- **Frontend:** [Blade / Livewire / Filament / Inertia+Vue / Inertia+React / API-only]
 - **Auth:** [Sanctum / Passport / Breeze / Jetstream / Fortify / Custom]
 
 ### Key Packages
@@ -180,9 +180,9 @@ Collect and document the following:
 - Missing test coverage: [areas that need tests]
 
 ### Code Style
-- Formatter: [Pint / PHP-CS-Fixer / None]
-- Static analysis: [PHPStan / Larastan / Psalm / None]
-- CI checks: [yes / no]
+- Formatter: [Pint / PHP-CS-Fixer / None → **recommend Pint**]
+- Static analysis: [PHPStan / Larastan / Psalm / None → **recommend Larastan level 5+**]
+- CI checks: [yes / no → **recommend adding if missing**]
 
 ### Technical Debt
 [List identified issues]
@@ -195,6 +195,142 @@ Collect and document the following:
 - CSRF: [proper middleware? yes/no]
 - Authorization: [Policies / Gates / inline / none]
 ```
+
+### Phase 6: Stack Recommendations & Modernization
+
+After completing the quality assessment, **proactively evaluate the project's technology stack** and recommend modern alternatives where appropriate. Present these as actionable suggestions — not demands — with clear rationale.
+
+#### Admin Panel & Backend UI
+
+**Recommend: Filament + Livewire** (instead of Bootstrap, jQuery, or custom admin panels)
+
+| Current Stack | Recommendation | Rationale |
+|---------------|---------------|-----------|
+| Bootstrap + jQuery admin | Migrate to **Filament 3** | Full-featured admin panel: CRUD, forms, tables, widgets, notifications — all Livewire-based, zero custom JS required |
+| Custom admin panel (Blade + Bootstrap) | Migrate to **Filament 3** | Eliminates thousands of lines of boilerplate. Built-in: filters, bulk actions, export, charts, user management |
+| Laravel Nova | Consider **Filament 3** | Free, open-source, more flexible, larger community, Livewire-native |
+| Backpack for Laravel | Consider **Filament 3** | More modern architecture, better DX, active development |
+| No admin panel | Add **Filament 3** | Zero-config admin panel: `composer require filament/filament && php artisan filament:install --panels` |
+
+**When to suggest Filament:**
+- Project has ANY admin/dashboard interface → Filament
+- Project needs CRUD management for database records → Filament
+- Project uses Bootstrap for backend (not public frontend) → Filament
+- Project has complex forms with dynamic fields → Filament Forms
+- Project needs data tables with search/filter/sort → Filament Tables
+
+**Filament ecosystem to mention:**
+- `filament/filament` — Full admin panel (panels, resources, pages)
+- `filament/forms` — Standalone form builder (usable outside admin)
+- `filament/tables` — Standalone table builder (usable outside admin)
+- `filament/notifications` — Toast & database notifications
+- `filament/actions` — Modal actions & confirmations
+- `filament/infolists` — Read-only data display
+- `filament/widgets` — Dashboard widgets & charts
+
+#### Frontend Stack
+
+| Current Stack | Recommendation | Rationale |
+|---------------|---------------|-----------|
+| Bootstrap CSS | Migrate to **Tailwind CSS** | Utility-first, smaller bundle, default in Laravel, Filament uses it |
+| jQuery for interactivity | Replace with **Livewire 3** or **Alpine.js** | No build step, server-driven (Livewire) or lightweight (Alpine), both Laravel-native |
+| Custom JS + Bootstrap | **Livewire 3 + Alpine.js + Tailwind** | The "TALL stack" — Laravel's recommended modern frontend |
+| Vue.js (Options API) | Consider **Inertia.js + Vue 3** (Composition API) | If keeping SPA approach, modernize with Inertia for Laravel-native SPA routing |
+| React frontend | Consider **Inertia.js + React** | Better Laravel integration than separate SPA with API |
+| No frontend framework | **Livewire 3** for interactive features | Add reactivity without leaving Blade |
+
+**Decision flow for frontend recommendation:**
+1. Admin/backend UI → **Filament** (always)
+2. Public-facing interactive app → **Livewire 3** (server-driven) OR **Inertia.js** (SPA-like)
+3. Simple pages with minor interactivity → **Alpine.js + Blade**
+4. API-only backend → no frontend recommendation needed
+5. Mobile app backend → API-only, suggest API standards from laravel-api skill
+
+#### Code Quality Tools
+
+**Recommend these if not already present in the project:**
+
+| Tool | Check For | Install Command | Purpose |
+|------|-----------|----------------|---------|
+| **Laravel Pint** | `pint.json` or `vendor/bin/pint` | `composer require laravel/pint --dev` | Opinionated PHP code style fixer (PSR-12 + Laravel preset). Run: `./vendor/bin/pint` |
+| **Larastan (PHPStan)** | `phpstan.neon` or `phpstan.neon.dist` | `composer require larastan/larastan --dev` | Static analysis — catch bugs without running code. Recommend level 5+ |
+| **Pest PHP** | `tests/Pest.php` or `pestphp/pest` in composer | `composer require pestphp/pest --dev --with-all-dependencies` | Modern testing framework — cleaner syntax than PHPUnit, built-in expectations |
+| **Laravel Debugbar** | `barryvdh/laravel-debugbar` in composer | `composer require barryvdh/laravel-debugbar --dev` | In-browser debugging toolbar — queries, views, routes, cache, time |
+| **IDE Helper** | `barryvdh/laravel-ide-helper` in composer | `composer require barryvdh/laravel-ide-helper --dev` | Better IDE autocompletion for models, facades, macros |
+
+**Proactive Pint setup:**
+If the project does NOT have Laravel Pint (`pint.json` not found), suggest adding it immediately:
+```bash
+composer require laravel/pint --dev
+```
+Then create `pint.json` following the configuration from the **laravel-code-style** skill.
+
+**Proactive Larastan setup:**
+If the project does NOT have PHPStan/Larastan (`phpstan.neon` not found), suggest:
+```bash
+composer require larastan/larastan --dev
+```
+Then create `phpstan.neon.dist` with at least level 5:
+```neon
+includes:
+    - vendor/larastan/larastan/extension.neon
+parameters:
+    paths:
+        - app/
+    level: 5
+```
+
+#### Recommended Spatie Packages
+
+Evaluate the project and suggest relevant [Spatie](https://spatie.be/open-source) packages:
+
+| Package | When to Suggest | Install |
+|---------|----------------|---------|
+| **spatie/laravel-permission** | Project has roles/permissions but uses custom implementation | `composer require spatie/laravel-permission` |
+| **spatie/laravel-data** | Project uses DTOs or transforms data frequently | `composer require spatie/laravel-data` |
+| **spatie/laravel-medialibrary** | Project handles file uploads / media | `composer require spatie/laravel-medialibrary` |
+| **spatie/laravel-activitylog** | Project needs audit trail / user activity logging | `composer require spatie/laravel-activitylog` |
+| **spatie/laravel-query-builder** | API has complex filtering/sorting needs | `composer require spatie/laravel-query-builder` |
+| **spatie/laravel-settings** | Project stores settings in database | `composer require spatie/laravel-settings` |
+| **spatie/laravel-backup** | No backup strategy exists | `composer require spatie/laravel-backup` |
+| **spatie/laravel-tags** | Project needs tagging functionality | `composer require spatie/laravel-tags` |
+
+> **Rule:** Don't suggest ALL packages — only those relevant to the project's actual needs. Suggest 2-4 max per analysis.
+
+#### Production Monitoring & DevOps
+
+| Tool | When to Suggest | Purpose |
+|------|----------------|---------|
+| **Laravel Pulse** | Laravel 11+ projects missing monitoring | Real-time application performance dashboard (requests, slow queries, exceptions, queues) |
+| **Laravel Horizon** | Projects using Redis for queues | Queue monitoring dashboard, job metrics, retry management |
+| **Laravel Telescope** | Development environment needs debugging | Request inspector, query log, job watcher, exception viewer |
+| **Sentry** (`sentry/sentry-laravel`) | No error tracking service configured | Production error tracking with stack traces, context, user info |
+
+#### Recommendation Presentation Format
+
+When presenting recommendations to the user, use this format:
+
+```markdown
+## Stack Recommendations
+
+Based on my analysis, here are my recommendations for this project:
+
+### High Priority (should do)
+1. **Add Laravel Pint** — no code formatter detected. This will standardize code style across the team.
+2. **Add Larastan** — no static analysis configured. Level 5 catches many bugs at compile time.
+
+### Medium Priority (recommended)
+3. **Consider Filament for admin** — the current Bootstrap admin panel could be replaced with Filament, reducing ~2000 lines of custom code.
+4. **Replace jQuery with Livewire/Alpine** — removes JS build dependency for interactive features.
+
+### Low Priority (nice to have)
+5. **Add Laravel Pulse** — production monitoring would help identify performance issues proactively.
+6. **Consider spatie/laravel-data** — could replace the custom DTO classes with built-in validation.
+
+Would you like me to implement any of these? I can start with the highest priority items.
+```
+
+> **Important:** Always prioritize recommendations. Not everything needs to happen at once. Suggest a phased approach — fix code quality tools first, then consider bigger stack migrations.
 
 ---
 
@@ -220,7 +356,7 @@ Generate this document after completing the analysis:
 | Database | MySQL/PostgreSQL | x.x |
 | Cache | Redis/Memcached | - |
 | Queue | Redis/Database | - |
-| Frontend | Blade/Livewire/Inertia | x.x |
+| Frontend | Blade/Livewire/Filament/Inertia | x.x |
 | Auth | Sanctum/Passport | x.x |
 
 ## Architecture Diagram
