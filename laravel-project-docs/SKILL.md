@@ -189,11 +189,17 @@ Collect and document the following:
 - [ ] [Issue description — severity: high/medium/low]
 
 ### Security Review
-- Mass assignment protection: [guarded / fillable / mixed]
-- SQL injection risks: [raw queries found? yes/no]
-- XSS protection: [{!! !!} usage found? yes/no]
+- Mass assignment protection: [guarded / fillable / mixed → **flag if $guarded = []**]
+- SQL injection risks: [raw queries found? yes/no → **flag any string interpolation in SQL**]
+- XSS protection: [{!! !!} usage found? yes/no → **flag {!! !!} with user data**]
 - CSRF: [proper middleware? yes/no]
-- Authorization: [Policies / Gates / inline / none]
+- Authorization: [Policies / Gates / inline / none → **flag missing auth checks**]
+- Hard-coded secrets: [scan for API keys, passwords in code → **flag immediately**]
+- File uploads: [validation present? type/size checks? → **flag missing validation**]
+- Rate limiting: [on auth endpoints? → **flag if missing on login/register**]
+- Dependencies: [known CVEs in composer packages? run `composer audit`]
+
+> **⚠️ IMPORTANT:** Any security finding with severity HIGH or CRITICAL must be reported to the user immediately with a `⚠️ SECURITY WARNING` — do not wait until the end of the analysis. Use the flagging format defined in the **laravel-security** skill.
 ```
 
 ### Phase 6: Stack Recommendations & Modernization

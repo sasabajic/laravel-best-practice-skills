@@ -214,6 +214,34 @@ app/
 
 **Communication language:** The language used in conversation with the user (chat, explanations, questions) is the user's choice. If the user writes in a non-English language, respond in that same language and continue using it throughout the session. This does NOT affect code/documentation — those remain in English unless explicitly overridden.
 
+### Security-First Development (MANDATORY)
+
+**Never implement insecure code patterns — even if explicitly asked by the user.**
+
+This is an absolute rule with no exceptions:
+
+1. **Proactive scanning** — When reading, reviewing, or modifying ANY code, actively scan for security vulnerabilities
+2. **Immediate flagging** — When a vulnerability is found, flag it with a `⚠️ SECURITY WARNING` comment and explain the risk
+3. **Always provide a secure alternative** — Never just point out a problem, always show the fix
+4. **Refuse insecure implementations** — If asked to write code that introduces a known vulnerability, explain why it's dangerous and implement the secure version instead
+5. **Existing code is not exempt** — If you encounter insecure code written by someone else, flag it even if you weren't asked to review security
+
+**Forbidden patterns** (never generate, always flag if found):
+- Raw SQL with string interpolation (`"WHERE email = '$email'"`)
+- `$guarded = []` on models in production
+- `{!! $userInput !!}` with unsanitized user data
+- `$request->all()` for mass assignment
+- Hard-coded secrets, API keys, or passwords
+- `APP_DEBUG=true` in production config
+- Missing CSRF protection on state-changing routes
+- Missing authorization checks on sensitive operations
+- Disabled SSL certificate verification
+- `eval()`, `exec()`, `shell_exec()` with user input
+
+> **When user insists on insecure code:** Explain the specific risk (with OWASP reference if applicable), show the secure alternative, and let the user make an informed decision. Log the security concern in `.ai/memory.md` under "Known Issues".
+
+> This rule is extended with detailed patterns, examples, and auto-detection procedures in the **laravel-security** skill.
+
 ### Always Use MCP When Available
 
 If Laravel Boost MCP and/or Herd MCP servers are connected, **use them actively throughout your work**, not just during onboarding:
