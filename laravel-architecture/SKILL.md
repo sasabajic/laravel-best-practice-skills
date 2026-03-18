@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-architecture
 description: Laravel architectural patterns and design principles including Service classes, Action classes, DTOs, Repository pattern, SOLID principles, event-driven architecture, and domain-driven design within Laravel applications.
@@ -337,5 +336,3 @@ When deciding where to put code, follow this decision tree:
 8. **Is it a scheduled/background task?** → Job (queued)
 9. **Is it reusable logic across models?** → Trait
 10. **Is it a fixed set of values?** → Enum
-
-````

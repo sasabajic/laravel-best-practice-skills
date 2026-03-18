@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-code-style
 description: Laravel code style and quality standards including PSR-12, Laravel Pint configuration, PHPStan/Larastan static analysis, naming conventions, code formatting, import ordering, and consistent coding patterns.
@@ -312,5 +311,3 @@ When writing or reviewing Laravel code, verify:
 - [ ] Trailing commas in multi-line structures
 - [ ] No deeply nested code (max 2-3 levels) — extract methods
 - [ ] No long methods (max ~20 lines) — extract into smaller methods
-
-````

@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-general
 description: Core Laravel development principles, conventions, project structure, and philosophy. Activates for any Laravel-related coding task including creating controllers, models, routes, middleware, and general PHP development within a Laravel project.
@@ -476,5 +475,3 @@ This is not optional. Follow this procedure:
 > **Rule:** If the user asks to commit, push, or merge — first check what has changed since the last commit and update docs accordingly. Only then execute the git operation. If nothing documentation-worthy changed (e.g., only code style fixes), skip the docs update.
 
 > **Shortcut:** If the user explicitly says "commit without docs" or is in a hurry, skip the docs update but add a `// TODO: update docs` note in the commit message.
-
-````

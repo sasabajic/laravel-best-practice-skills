@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-project-docs
 description: Project analysis, planning, and technical documentation for Laravel applications. Activates when starting a new project, entering an existing project without documentation, planning features, creating technical specs, or when documentation is missing or outdated. Ensures every project has proper analysis, architecture docs, and implementation plans.
@@ -696,5 +695,3 @@ AI thinking:
 ```
 
 > **Exception:** If the user explicitly says to skip docs (e.g., "commit without docs", "quick commit"), add `[skip-docs]` to the commit message as a reminder to update later.
-
-````

@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-testing
 description: Laravel testing best practices using Pest PHP and PHPUnit including feature tests, unit tests, model factories, test organization, assertions, mocking, database testing, API testing, and test-driven development workflows.
@@ -391,5 +390,3 @@ it('expires orders after 30 days', function () {
 | **Mail/Notifications** | Content, recipients, queuing |
 | **Commands** | Output, side effects, exit codes |
 | **Policies** | All permission scenarios |
-
-````

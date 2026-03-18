@@ -1,4 +1,3 @@
-````skill
 ---
 name: ai-memory
 description: Persistent AI memory and context management for Laravel projects. Manages a .ai/memory.md file that stores project knowledge, current work progress, and session state. ALWAYS activates at the start of any session or when entering a project. Ensures continuity across sessions, restarts, crashes, and context switches.
@@ -278,5 +277,3 @@ Update the top sections of memory when you discover:
 
 ### Scenario: Multiple tasks in parallel
 → Use numbered sub-tasks under "Current Task" with individual statuses
-
-````

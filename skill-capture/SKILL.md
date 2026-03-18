@@ -1,4 +1,3 @@
-````skill
 ---
 name: skill-capture
 description: Helper skill for capturing, extracting, and documenting coding patterns, rules, and best practices learned during coding sessions. Use when the user asks to save, export, capture, or document a pattern, convention, or rule they want to remember and reuse.
@@ -97,8 +96,7 @@ When the user asks for a session summary of learned patterns, format it as:
 
 When the captured knowledge doesn't fit any existing skill:
 
-```markdown
-````skill
+```
 ---
 name: [skill-name]
 description: [Clear description of when this skill should activate. Include keywords that trigger activation.]
@@ -113,7 +111,6 @@ description: [Clear description of when this skill should activate. Include keyw
 
 ## [Section 2]
 [Rules, patterns, examples]
-````
 ```
 
 ### New Skill Checklist
@@ -134,5 +131,3 @@ description: [Clear description of when this skill should activate. Include keyw
 5. **Keep it scannable** — Use headers, bullet points, tables
 6. **Include the WHY** — Brief reason helps AI apply rules correctly
 7. **Use trigger words** in description — helps Copilot know WHEN to load the skill
-
-````

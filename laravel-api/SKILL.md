@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-api
 description: Laravel REST API design best practices including API Resources, API controllers, authentication with Sanctum, versioning, rate limiting, error handling, pagination, filtering, and JSON response conventions. Activates when building APIs, creating endpoints, or working with API authentication.
@@ -383,5 +382,3 @@ RateLimiter::for('auth', function (Request $request) {
     });
 })
 ```
-
-````

@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-security
 description: Laravel security best practices including validation, Form Requests, authorization with Policies and Gates, CSRF protection, XSS prevention, SQL injection prevention, rate limiting, input sanitization, and security hardening techniques.
@@ -445,5 +444,3 @@ RateLimiter::for('login', function (Request $request) {
 // Apply to routes
 Route::post('login', LoginController::class)->middleware('throttle:login');
 ```
-
-````

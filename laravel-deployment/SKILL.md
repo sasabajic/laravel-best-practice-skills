@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-deployment
 description: Laravel deployment best practices including Docker configuration, CI/CD pipelines with GitHub Actions, environment configuration, production optimization, zero-downtime deployment, monitoring, logging, and infrastructure setup.
@@ -453,5 +452,3 @@ sudo systemctl reload php8.3-fpm
 
 echo "✅ Deployment complete"
 ```
-
-````

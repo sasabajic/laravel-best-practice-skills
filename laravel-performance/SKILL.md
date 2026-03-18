@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-performance
 description: Laravel application performance optimization including caching strategies, queue and job management, database query optimization, eager loading, Redis usage, lazy collections, indexing, and profiling. Activates when working with caching, queues, jobs, optimization, or performance-related tasks.
@@ -341,5 +340,3 @@ DB::listen(function ($query) {
     }
 });
 ```
-
-````

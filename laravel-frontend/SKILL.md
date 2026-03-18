@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-frontend
 description: Laravel frontend development best practices including Blade components, Livewire, Inertia.js with Vue/React, Vite asset bundling, Tailwind CSS integration, Alpine.js, and modern frontend patterns within Laravel applications.
@@ -365,5 +364,3 @@ Use **Alpine.js** for simple interactive behaviors that don't need Livewire:
     Delete
 </button>
 ```
-
-````

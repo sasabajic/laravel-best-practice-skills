@@ -1,4 +1,3 @@
-````skill
 ---
 name: laravel-eloquent-database
 description: Laravel Eloquent ORM best practices, database migrations, relationships, model conventions, query optimization, N+1 prevention, seeders, factories, scopes, accessors, mutators, and casts. Activates when working with models, database, queries, or migrations.
@@ -452,5 +451,3 @@ User::withSum('orders', 'total')
     ->having('orders_sum_total', '>', 1000)
     ->get();
 ```
-
-````
