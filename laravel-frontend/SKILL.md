@@ -364,3 +364,247 @@ Use **Alpine.js** for simple interactive behaviors that don't need Livewire:
     Delete
 </button>
 ```
+
+## Server-Side Rendering (SSR) with Inertia
+
+### Why SSR
+
+- **SEO:** Search engines can crawl fully rendered HTML without executing JavaScript
+- **Initial load performance:** Users see content faster — HTML is pre-rendered on the server
+- **Social sharing:** Open Graph meta tags are present in the initial response
+
+### Enabling SSR in Inertia (Laravel + Vue)
+
+```bash
+# Install the SSR server dependencies
+npm install @vue/server-renderer
+```
+
+```js
+// vite.config.js
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+import vue from '@vitejs/plugin-vue';
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: 'resources/js/app.js',
+            ssr: 'resources/js/ssr.js',
+            refresh: true,
+        }),
+        vue(),
+    ],
+});
+```
+
+```js
+// resources/js/ssr.js
+import { createInertiaApp } from '@inertiajs/vue3';
+import createServer from '@inertiajs/vue3/server';
+import { renderToString } from '@vue/server-renderer';
+import { createSSRApp, h } from 'vue';
+
+createServer((page) =>
+    createInertiaApp({
+        page,
+        render: renderToString,
+        resolve: (name) => {
+            const pages = import.meta.glob('./Pages/**/*.vue', { eager: true });
+            return pages[`./Pages/${name}.vue`];
+        },
+        setup({ App, props, plugin }) {
+            return createSSRApp({ render: () => h(App, props) })
+                .use(plugin);
+        },
+    }),
+);
+```
+
+### Enabling SSR in Inertia (Laravel + React)
+
+```js
+// resources/js/ssr.jsx
+import { createInertiaApp } from '@inertiajs/react';
+import createServer from '@inertiajs/react/server';
+import ReactDOMServer from 'react-dom/server';
+
+createServer((page) =>
+    createInertiaApp({
+        page,
+        render: ReactDOMServer.renderToString,
+        resolve: (name) => {
+            const pages = import.meta.glob('./Pages/**/*.jsx', { eager: true });
+            return pages[`./Pages/${name}.jsx`];
+        },
+        setup: ({ App, props }) => <App {...props} />,
+    }),
+);
+```
+
+### Inertia SSR Config
+
+```php
+<?php
+
+declare(strict_types=1);
+
+// config/inertia.php
+return [
+    'ssr' => [
+        'enabled' => true,
+        'url' => 'http://127.0.0.1:13714',
+    ],
+];
+```
+
+### Running the SSR Server
+
+```bash
+# Build the SSR bundle
+npm run build
+
+# Start the SSR server
+php artisan inertia:start-ssr
+
+# Stop the SSR server
+php artisan inertia:stop-ssr
+```
+
+### When to Use SSR vs CSR
+
+| Scenario | Recommendation |
+|----------|---------------|
+| Public marketing pages, blog, landing pages | **SSR** — SEO is critical |
+| Admin dashboards, internal tools | **CSR** — no SEO needed |
+| E-commerce product pages | **SSR** — SEO + performance |
+| Authenticated app areas | **CSR** — faster navigation |
+
+### SSR Rules
+
+- Enable SSR only for pages that benefit from SEO or initial load performance
+- Avoid using `window`, `document`, or browser-only APIs in SSR-rendered components — use `onMounted()` (Vue) or `useEffect()` (React) for client-only code
+- Test SSR locally before deploying — run `php artisan inertia:start-ssr` and verify rendered HTML
+- Use `Inertia::lazy()` and `Inertia::defer()` to reduce SSR payload size
+- Cross-reference **laravel-performance** for caching strategies that complement SSR
+
+## Progressive Web App (PWA) Setup
+
+### What PWA Provides
+
+- **Offline support:** Service workers cache assets and API responses for offline use
+- **Install prompt:** Users can install the app to their home screen
+- **Push notifications:** Re-engage users with web push notifications
+- **Performance:** Precached assets load instantly on repeat visits
+
+### Service Worker Setup
+
+```js
+// resources/js/service-worker.js
+const CACHE_NAME = 'app-cache-v1';
+const PRECACHE_URLS = [
+    '/',
+    '/offline',
+    '/build/assets/app.css',
+    '/build/assets/app.js',
+];
+
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    );
+});
+
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request).then((cached) => {
+            return cached || fetch(event.request).catch(() => {
+                if (event.request.mode === 'navigate') {
+                    return caches.match('/offline');
+                }
+            });
+        })
+    );
+});
+```
+
+```js
+// resources/js/app.js — register the service worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then((registration) => {
+                console.log('SW registered:', registration.scope);
+            })
+            .catch((error) => {
+                console.error('SW registration failed:', error);
+            });
+    });
+}
+```
+
+### Web Manifest Configuration
+
+```json
+// public/manifest.json
+{
+    "name": "My Laravel App",
+    "short_name": "LaravelApp",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4f46e5",
+    "icons": [
+        {
+            "src": "/images/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/images/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
+```
+
+```blade
+{{-- Include in your layout head --}}
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4f46e5">
+<link rel="apple-touch-icon" href="/images/icons/icon-192x192.png">
+```
+
+### Laravel PWA Package Options
+
+```bash
+# Option: use a community package for quick setup
+composer require silviolleite/laravelpwa
+php artisan vendor:publish --provider="LaravelPWA\Providers\LaravelPWAServiceProvider"
+```
+
+```php
+<?php
+
+declare(strict_types=1);
+
+// config/laravelpwa.php — key settings
+return [
+    'name' => 'My Laravel App',
+    'manifest' => [
+        'display' => 'standalone',
+        'theme_color' => '#4f46e5',
+        'background_color' => '#ffffff',
+    ],
+];
+```
+
+### PWA Rules
+
+- Always provide a fallback offline page at `/offline`
+- Version your cache names (`app-cache-v1`, `app-cache-v2`) to bust stale caches on deploy
+- Use a network-first strategy for API calls and a cache-first strategy for static assets
+- Test with Chrome DevTools → Application → Service Workers and Lighthouse PWA audit
+- Keep the web manifest `start_url` and `scope` consistent with your app routes
+- Cross-reference **laravel-performance** for asset optimization and caching strategies that complement PWA
