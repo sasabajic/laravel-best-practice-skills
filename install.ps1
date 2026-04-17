@@ -4,13 +4,14 @@
 
 $ErrorActionPreference = "Stop"
 
+$version = "2.0.0"
 $skillsDir = Join-Path $env:USERPROFILE ".copilot\skills"
 $tempDir = Join-Path $env:TEMP "laravel-best-practice-skills-$(Get-Random)"
 $repoUrl = "https://github.com/sasabajic/laravel-best-practice-skills.git"
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "  Laravel Best Practice Skills — Installer" -ForegroundColor Cyan
+Write-Host "  Laravel Best Practice Skills — Installer v$version" -ForegroundColor Cyan
 Write-Host "  github.com/sasabajic/laravel-best-practice-skills" -ForegroundColor Gray
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
@@ -58,12 +59,28 @@ if (Test-Path $githubDir) {
     Write-Host "  Installed: .github (prompt templates)" -ForegroundColor Green
 }
 
+# Copy project documentation files
+foreach ($file in @("README.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE")) {
+    $filePath = Join-Path $tempDir $file
+    if (Test-Path $filePath) {
+        Copy-Item -Path $filePath -Destination (Join-Path $skillsDir $file) -Force
+        Write-Host "  Copied: $file" -ForegroundColor Green
+    }
+}
+
 # Cleanup temp directory
 Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
-Write-Host "Done! Installed $count skills to:" -ForegroundColor Green
+Write-Host "Done! Installed $count skills (v$version) to:" -ForegroundColor Green
 Write-Host "  $skillsDir" -ForegroundColor White
+Write-Host ""
+Write-Host "Installed skills:" -ForegroundColor Yellow
+Get-ChildItem -Path $skillsDir -Directory | Where-Object {
+    Test-Path (Join-Path $_.FullName "SKILL.md")
+} | ForEach-Object {
+    Write-Host "  * $($_.Name)" -ForegroundColor White
+}
 Write-Host ""
 Write-Host "To update later, run this script again." -ForegroundColor Gray
 Write-Host ""

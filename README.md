@@ -108,7 +108,7 @@ npx skills add sasabajic/laravel-best-practice-skills@laravel-general -g -y
 npx skills add sasabajic/laravel-best-practice-skills@laravel-architecture -g -y
 ```
 
-Available skill names: `laravel-general`, `laravel-architecture`, `laravel-eloquent-database`, `laravel-api`, `laravel-testing`, `laravel-security`, `laravel-performance`, `laravel-frontend`, `laravel-code-style`, `laravel-deployment`, `laravel-project-docs`, `ai-memory`
+Available skill names: `laravel-general`, `laravel-architecture`, `laravel-eloquent-database`, `laravel-api`, `laravel-testing`, `laravel-security`, `laravel-performance`, `laravel-frontend`, `laravel-code-style`, `laravel-deployment`, `laravel-filament`, `laravel-real-time`, `laravel-notifications`, `laravel-scheduling`, `laravel-error-handling`, `laravel-localization`, `laravel-project-docs`, `ai-memory`
 
 ### Option 3: Manual installation (clone & copy)
 
