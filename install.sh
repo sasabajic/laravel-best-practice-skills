@@ -5,13 +5,14 @@
 
 set -e
 
+VERSION="2.0.0"
 SKILLS_DIR="$HOME/.copilot/skills"
 TEMP_DIR="/tmp/laravel-best-practice-skills-$$"
 REPO_URL="https://github.com/sasabajic/laravel-best-practice-skills.git"
 
 echo ""
 echo "================================================"
-echo "  Laravel Best Practice Skills — Installer"
+echo "  Laravel Best Practice Skills — Installer v$VERSION"
 echo "  github.com/sasabajic/laravel-best-practice-skills"
 echo "================================================"
 echo ""
@@ -56,12 +57,37 @@ if [ -d "$TEMP_DIR/.github" ]; then
     echo "  Installed: .github (prompt templates)"
 fi
 
+# Copy project documentation files
+for file in README.md CHANGELOG.md CONTRIBUTING.md LICENSE; do
+    if [ -f "$TEMP_DIR/$file" ]; then
+        cp "$TEMP_DIR/$file" "$SKILLS_DIR/$file"
+        echo "  Copied: $file"
+    fi
+done
+
 # Cleanup temp directory
 rm -rf "$TEMP_DIR"
 
 echo ""
-echo "Done! Installed $COUNT skills to:"
+echo "Done! Installed $COUNT skills (v$VERSION) to:"
 echo "  $SKILLS_DIR"
+echo ""
+echo "Installed skills:"
+for dir in "$SKILLS_DIR"/laravel-*/; do
+    if [ -f "${dir}SKILL.md" ]; then
+        echo "  • $(basename "$dir")"
+    fi
+done
+for dir in "$SKILLS_DIR"/ai-*/; do
+    if [ -f "${dir}SKILL.md" ]; then
+        echo "  • $(basename "$dir")"
+    fi
+done
+for dir in "$SKILLS_DIR"/skill-*/; do
+    if [ -f "${dir}SKILL.md" ]; then
+        echo "  • $(basename "$dir")"
+    fi
+done
 echo ""
 echo "To update later, run this script again."
 echo ""

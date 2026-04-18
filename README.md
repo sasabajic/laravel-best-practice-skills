@@ -1,6 +1,8 @@
 # Laravel Best Practice Skills for GitHub Copilot
 
-A comprehensive set of GitHub Copilot agent skills that enforce Laravel best practices, coding standards, and architectural patterns across all your Laravel projects.
+> **Version 2.0.0** — 18 skills covering the full Laravel ecosystem
+
+A comprehensive set of GitHub Copilot agent skills that enforce Laravel best practices, coding standards, and architectural patterns across all your Laravel projects. Compatible with **Laravel 10+** with recommendations to upgrade to the latest version where applicable.
 
 ## What is this?
 
@@ -10,20 +12,72 @@ Once installed, these skills are automatically activated when you work on Larave
 
 ## Skills Included
 
+### Core Skills
+
 | Skill | Description |
 |-------|-------------|
-| **laravel-general** | Core principles, conventions, project structure, philosophy |
-| **laravel-architecture** | Design patterns — Services, Actions, DTOs, Repository pattern |
-| **laravel-eloquent-database** | Eloquent best practices, migrations, relationships, query optimization |
-| **laravel-api** | REST API design, API Resources, authentication, error handling |
-| **laravel-testing** | Testing strategy with Pest/PHPUnit, factories, what & how to test |
-| **laravel-security** | Validation, authorization, Form Requests, security hardening |
-| **laravel-performance** | Caching, queues, jobs, database & application optimization |
-| **laravel-frontend** | Blade components, Livewire, Inertia.js, Vite configuration |
-| **laravel-code-style** | PSR-12, Laravel Pint, PHPStan/Larastan, naming conventions |
+| **laravel-general** | Core principles, conventions, project structure, philosophy, middleware |
+| **laravel-architecture** | Services, Actions, DTOs, Repository, Pipeline, Value Objects, DDD |
+| **laravel-eloquent-database** | Eloquent, migrations, UUID/ULID, polymorphic, Scout, pruning |
+| **laravel-api** | REST API, Resources, Sanctum, Scramble docs, CORS, webhooks, bulk ops |
+| **laravel-security** | Validation, Policies, 2FA, CSP, signed URLs, dependency auditing |
+| **laravel-performance** | Caching, queues, Octane, HTTP caching, image optimization, pooling |
+| **laravel-testing** | Pest/PHPUnit, Dusk, arch testing, mutation testing, factories |
+| **laravel-code-style** | PSR-12, Pint, Larastan, Rector PHP, Git hooks, naming conventions |
+
+### Specialized Skills
+
+| Skill | Description |
+|-------|-------------|
+| **laravel-filament** | Filament 3 admin panels, resources, forms, tables, widgets, multi-tenancy |
+| **laravel-real-time** | Broadcasting with Reverb, Echo, channels, presence, WebSockets |
+| **laravel-notifications** | Mail, database, broadcast, SMS, Slack notifications, queuing |
+| **laravel-scheduling** | Task scheduling, Artisan commands, cron, overlapping prevention |
+| **laravel-error-handling** | Exception handling, custom exceptions, logging, Sentry integration |
+| **laravel-localization** | Translations, locale middleware, date/number formatting, i18n |
+| **laravel-frontend** | Blade, Livewire, Inertia.js, SSR, PWA, Vite configuration |
 | **laravel-deployment** | Docker, CI/CD, environment configuration, monitoring |
+
+### Meta Skills
+
+| Skill | Description |
+|-------|-------------|
 | **laravel-project-docs** | Project analysis, planning, technical documentation generation |
 | **ai-memory** | Persistent AI memory — project context, work tracking, session continuity |
+
+## Skill Dependency Map
+
+```mermaid
+graph TD
+    G[laravel-general] --> A[laravel-architecture]
+    G --> S[laravel-security]
+    G --> PD[laravel-project-docs]
+
+    A --> E[laravel-eloquent-database]
+    A --> API[laravel-api]
+    A --> P[laravel-performance]
+
+    E --> API
+    E --> F[laravel-filament]
+    E --> T[laravel-testing]
+
+    S --> API
+    S --> F
+
+    P --> RT[laravel-real-time]
+    P --> SC[laravel-scheduling]
+
+    API --> T
+    API --> EH[laravel-error-handling]
+
+    F --> FR[laravel-frontend]
+    F --> L[laravel-localization]
+
+    RT --> N[laravel-notifications]
+
+    CS[laravel-code-style] --> T
+    PD --> MEM[ai-memory]
+```
 
 ## Installation
 
@@ -54,7 +108,7 @@ npx skills add sasabajic/laravel-best-practice-skills@laravel-general -g -y
 npx skills add sasabajic/laravel-best-practice-skills@laravel-architecture -g -y
 ```
 
-Available skill names: `laravel-general`, `laravel-architecture`, `laravel-eloquent-database`, `laravel-api`, `laravel-testing`, `laravel-security`, `laravel-performance`, `laravel-frontend`, `laravel-code-style`, `laravel-deployment`, `laravel-project-docs`, `ai-memory`
+Available skill names: `laravel-general`, `laravel-architecture`, `laravel-eloquent-database`, `laravel-api`, `laravel-testing`, `laravel-security`, `laravel-performance`, `laravel-frontend`, `laravel-code-style`, `laravel-deployment`, `laravel-filament`, `laravel-real-time`, `laravel-notifications`, `laravel-scheduling`, `laravel-error-handling`, `laravel-localization`, `laravel-project-docs`, `ai-memory`
 
 ### Option 3: Manual installation (clone & copy)
 

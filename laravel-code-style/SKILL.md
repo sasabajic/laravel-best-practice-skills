@@ -311,3 +311,154 @@ When writing or reviewing Laravel code, verify:
 - [ ] Trailing commas in multi-line structures
 - [ ] No deeply nested code (max 2-3 levels) — extract methods
 - [ ] No long methods (max ~20 lines) — extract into smaller methods
+
+## Rector PHP for Automated Refactoring
+
+Use **Rector** to automate code upgrades and refactoring across your Laravel project.
+
+### Installation & Configuration
+
+```bash
+composer require rector/rector --dev
+```
+
+Create `rector.php` in the project root:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Rector\Config\RectorConfig;
+use Rector\Set\ValueObject\LevelSetList;
+use Rector\Set\ValueObject\SetList;
+use RectorLaravel\Set\LaravelSetList;
+
+return RectorConfig::configure()
+    ->withPaths([
+        __DIR__ . '/app',
+        __DIR__ . '/config',
+        __DIR__ . '/database',
+        __DIR__ . '/routes',
+        __DIR__ . '/tests',
+    ])
+    ->withSets([
+        LevelSetList::UP_TO_PHP_83,
+        SetList::CODE_QUALITY,
+        SetList::DEAD_CODE,
+        SetList::EARLY_RETURN,
+        LaravelSetList::LARAVEL_110,
+    ])
+    ->withSkip([
+        __DIR__ . '/bootstrap/cache',
+        __DIR__ . '/storage',
+        __DIR__ . '/vendor',
+    ]);
+```
+
+### Running Rector
+
+```bash
+# Preview changes (dry run)
+vendor/bin/rector process --dry-run
+
+# Apply changes
+vendor/bin/rector process
+
+# Process a specific directory
+vendor/bin/rector process app/Services
+```
+
+### Common Use Cases
+
+- **PHP version upgrades** — automatically convert code to use newer PHP syntax (match, named arguments, readonly)
+- **Laravel version upgrades** — update deprecated method calls to new API
+- **Dead code removal** — remove unused variables, methods, imports
+- **Early returns** — refactor nested if/else to early return pattern
+- **Code quality** — simplify boolean expressions, use strict comparisons
+
+### Rector Rules
+
+- Run Rector with `--dry-run` first to review changes
+- Commit Rector changes separately from manual changes
+- Use in CI to enforce code modernization
+- Configure Laravel-specific rectors via `rectorphp/rector-laravel` package
+- Start with conservative rules and add more over time
+
+> See also: **laravel-testing** skill — run tests after Rector to ensure no regressions.
+
+## Git Hooks for Code Quality
+
+Use Git hooks to enforce code quality checks before code reaches the repository.
+
+### CaptainHook Setup (PHP-native)
+
+```bash
+composer require captainhook/captainhook --dev
+vendor/bin/captainhook install
+```
+
+Create `captainhook.json`:
+
+```json
+{
+    "pre-commit": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "vendor/bin/pint --test",
+                "conditions": []
+            },
+            {
+                "action": "vendor/bin/phpstan analyse --memory-limit=512M",
+                "conditions": []
+            }
+        ]
+    },
+    "pre-push": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "php artisan test --parallel",
+                "conditions": []
+            }
+        ]
+    }
+}
+```
+
+### Composer Scripts Alternative
+
+Add quality check scripts to `composer.json`:
+
+```json
+{
+    "scripts": {
+        "lint": "vendor/bin/pint --test",
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "php artisan test --parallel",
+        "quality": [
+            "@lint",
+            "@analyse",
+            "@test"
+        ]
+    }
+}
+```
+
+Run all checks with one command:
+
+```bash
+composer quality
+```
+
+### Git Hooks Rules
+
+- Pre-commit: run Pint (fast, formatting only)
+- Pre-push: run Larastan and tests (slower, catches bugs)
+- Use CaptainHook or Husky — don't rely on manual `.git/hooks` scripts
+- Keep pre-commit hooks fast (under 10 seconds) — defer slow checks to pre-push or CI
+- Document hook setup in the project README or `DEVELOPMENT.md`
+- Add `composer quality` script as a single command for all checks
+
+> See also: **laravel-testing** skill for test configuration.

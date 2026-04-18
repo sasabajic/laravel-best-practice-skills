@@ -475,3 +475,259 @@ This is not optional. Follow this procedure:
 > **Rule:** If the user asks to commit, push, or merge — first check what has changed since the last commit and update docs accordingly. Only then execute the git operation. If nothing documentation-worthy changed (e.g., only code style fixes), skip the docs update.
 
 > **Shortcut:** If the user explicitly says "commit without docs" or is in a hurry, skip the docs update but add a `// TODO: update docs` note in the commit message.
+
+## Middleware Best Practices
+
+### Custom Middleware Conventions
+
+- Name middleware descriptively using PascalCase: `EnsureUserIsSubscribed`, `TrackApiUsage`
+- Place custom middleware in `app/Http/Middleware/`
+- Use `php artisan make:middleware` to generate middleware
+- Always declare `strict_types` and use `final` classes with typed returns
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+// GOOD — final class, typed return, single responsibility
+final class EnsureUserIsSubscribed
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (! $request->user()?->isSubscribed()) {
+            return redirect()->route('billing.subscribe');
+        }
+
+        return $next($request);
+    }
+}
+```
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+// BAD — no strict types, not final, untyped return, doing too much
+class CheckUser
+{
+    public function handle($request, Closure $next)
+    {
+        // BAD: multiple responsibilities in one middleware
+        if (! $request->user()) {
+            return redirect('/login');
+        }
+        if (! $request->user()->isSubscribed()) {
+            return redirect('/subscribe');
+        }
+        if ($request->user()->isBanned()) {
+            abort(403);
+        }
+
+        return $next($request);
+    }
+}
+```
+
+### Middleware Groups
+
+```php
+<?php
+
+declare(strict_types=1);
+
+// bootstrap/app.php (Laravel 11+)
+use App\Http\Middleware\EnsureUserIsSubscribed;
+use App\Http\Middleware\TrackApiUsage;
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->appendToGroup('subscribed', [
+            EnsureUserIsSubscribed::class,
+        ]);
+
+        $middleware->appendToGroup('api-tracking', [
+            TrackApiUsage::class,
+        ]);
+    })
+    ->create();
+```
+
+### Route Middleware vs Global Middleware
+
+```php
+<?php
+
+declare(strict_types=1);
+
+// GOOD — route middleware: apply only where needed
+// routes/web.php
+Route::middleware(['subscribed'])->group(function (): void {
+    Route::get('/premium', [PremiumController::class, 'index']);
+    Route::get('/reports', [ReportController::class, 'index']);
+});
+
+// GOOD — global middleware: apply to every request (rare, use sparingly)
+// bootstrap/app.php
+->withMiddleware(function (Middleware $middleware): void {
+    $middleware->append(TrackRequestDuration::class);
+})
+```
+
+```php
+// BAD — applying middleware globally when it only applies to specific routes
+// Don't add EnsureUserIsSubscribed as global middleware
+// if only premium routes need it
+```
+
+### Middleware Ordering
+
+```php
+<?php
+
+declare(strict_types=1);
+
+// bootstrap/app.php — control middleware execution order
+return Application::configure(basePath: dirname(__DIR__))
+    ->withMiddleware(function (Middleware $middleware): void {
+        // Priority determines execution order
+        $middleware->priority([
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\Auth\Middleware\Authenticate::class,
+            EnsureUserIsSubscribed::class,
+            TrackApiUsage::class,
+        ]);
+    })
+    ->create();
+```
+
+### Middleware Parameters
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+// GOOD — middleware with parameters for reusability
+final class EnsureUserHasRole
+{
+    public function handle(Request $request, Closure $next, string ...$roles): Response
+    {
+        if (! $request->user()?->hasAnyRole($roles)) {
+            abort(403, 'Unauthorized.');
+        }
+
+        return $next($request);
+    }
+}
+```
+
+```php
+// Usage in routes
+Route::middleware(['role:admin,editor'])->group(function (): void {
+    Route::get('/admin', [AdminController::class, 'index']);
+});
+```
+
+### Middleware for Feature Flags
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+// GOOD — feature flag middleware with typed parameter
+final class EnsureFeatureIsEnabled
+{
+    public function handle(Request $request, Closure $next, string $feature): Response
+    {
+        if (! \Laravel\Pennant\Feature::active($feature)) {
+            abort(404);
+        }
+
+        return $next($request);
+    }
+}
+```
+
+```php
+// Usage in routes
+Route::middleware(['feature:new-dashboard'])->group(function (): void {
+    Route::get('/dashboard/v2', [DashboardV2Controller::class, 'index']);
+});
+```
+
+### Terminate Middleware for Post-Response Tasks
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
+
+// GOOD — terminate runs after response is sent to user
+final class TrackRequestDuration
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $request->attributes->set('request_start', microtime(true));
+
+        return $next($request);
+    }
+
+    public function terminate(Request $request, Response $response): void
+    {
+        $duration = microtime(true) - (float) $request->attributes->get('request_start');
+
+        Log::info('Request completed', [
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+            'status' => $response->getStatusCode(),
+            'duration_ms' => round($duration * 1000, 2),
+        ]);
+    }
+}
+```
+
+### Middleware Rules
+
+- **Single responsibility:** Each middleware should do exactly one thing
+- **Use `final` classes** with `declare(strict_types=1)` and typed returns on all custom middleware
+- **Prefer route middleware** over global middleware — only use global for truly cross-cutting concerns (e.g., request logging)
+- **Use middleware parameters** for reusable logic (e.g., `role:admin`, `feature:new-ui`)
+- **Use `terminate()`** for post-response tasks that shouldn't delay the response (logging, analytics)
+- **Keep middleware fast** — avoid database queries when possible; cache results if necessary
+- **Order matters** — configure priority in `bootstrap/app.php` when middleware depends on others
+- **Don't duplicate framework middleware** — check if Laravel already provides what you need (e.g., `throttle`, `auth`, `verified`)
+- Cross-reference **laravel-security** for authentication, authorization, and rate-limiting middleware patterns

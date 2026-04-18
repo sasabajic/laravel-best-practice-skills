@@ -444,3 +444,520 @@ RateLimiter::for('login', function (Request $request) {
 // Apply to routes
 Route::post('login', LoginController::class)->middleware('throttle:login');
 ```
+
+## Two-Factor Authentication (2FA)
+
+Use 2FA to add a second verification layer beyond passwords. Laravel Fortify provides built-in 2FA support; alternatively use `pragmarx/google2fa-laravel` for custom flows.
+
+### Setup Flow
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use PragmaRX\Google2FA\Google2FA;
+
+final class TwoFactorSetupController extends Controller
+{
+    public function __construct(
+        private readonly Google2FA $google2fa,
+    ) {}
+
+    public function enable(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $secretKey = $this->google2fa->generateSecretKey();
+
+        $user->update([
+            'two_factor_secret' => encrypt($secretKey),
+            'two_factor_confirmed_at' => null,
+        ]);
+
+        $qrCodeUrl = $this->google2fa->getQRCodeUrl(
+            config('app.name'),
+            $user->email,
+            $secretKey,
+        );
+
+        return response()->json([
+            'secret' => $secretKey,
+            'qr_code_url' => $qrCodeUrl,
+        ]);
+    }
+
+    public function verify(Request $request): JsonResponse
+    {
+        $request->validate([
+            'code' => ['required', 'string', 'size:6'],
+        ]);
+
+        $user = $request->user();
+        $secret = decrypt($user->two_factor_secret);
+
+        if (! $this->google2fa->verifyKey($secret, $request->input('code'))) {
+            return response()->json(['message' => 'Invalid 2FA code.'], 422);
+        }
+
+        $user->update([
+            'two_factor_confirmed_at' => now(),
+            'two_factor_recovery_codes' => encrypt(json_encode(
+                $this->generateRecoveryCodes(),
+                JSON_THROW_ON_ERROR,
+            )),
+        ]);
+
+        return response()->json(['message' => '2FA enabled successfully.']);
+    }
+
+    /** @return list<string> */
+    private function generateRecoveryCodes(): array
+    {
+        return array_map(
+            fn (): string => bin2hex(random_bytes(10)),
+            range(1, 8),
+        );
+    }
+}
+```
+
+### Middleware for 2FA Enforcement
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+final class EnsureTwoFactorVerified
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $user = $request->user();
+
+        if ($user?->two_factor_secret
+            && $user->two_factor_confirmed_at
+            && ! $request->session()->get('two_factor_verified')) {
+            return redirect()->route('two-factor.challenge');
+        }
+
+        return $next($request);
+    }
+}
+```
+
+### Recovery Code Handling
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+final class TwoFactorRecoveryController extends Controller
+{
+    public function recover(Request $request): JsonResponse
+    {
+        $request->validate([
+            'recovery_code' => ['required', 'string'],
+        ]);
+
+        $user = $request->user();
+        $codes = json_decode(decrypt($user->two_factor_recovery_codes), true, 512, JSON_THROW_ON_ERROR);
+
+        $codeIndex = array_search($request->input('recovery_code'), $codes, true);
+
+        if ($codeIndex === false) {
+            return response()->json(['message' => 'Invalid recovery code.'], 422);
+        }
+
+        unset($codes[$codeIndex]);
+
+        $user->update([
+            'two_factor_recovery_codes' => encrypt(json_encode(
+                array_values($codes),
+                JSON_THROW_ON_ERROR,
+            )),
+        ]);
+
+        $request->session()->put('two_factor_verified', true);
+
+        return response()->json(['message' => 'Recovered successfully.']);
+    }
+}
+```
+
+### 2FA Rules
+
+- **Encrypt the 2FA secret at rest** — never store plain-text secrets in the database
+- **Generate 8+ recovery codes** using cryptographically secure random bytes
+- **Invalidate recovery codes after use** — remove used codes immediately
+- **Require 2FA verification on every login** when enabled
+- **Use middleware to enforce 2FA** before accessing protected routes
+- Consider Laravel Fortify for a full-featured, first-party solution
+- See the **laravel-api** skill for securing API endpoints with 2FA
+
+## CORS Security
+
+Configure CORS restrictively to prevent unauthorized cross-origin requests. Laravel includes `config/cors.php` out of the box.
+
+### config/cors.php Settings
+
+```php
+<?php
+
+declare(strict_types=1);
+
+// config/cors.php
+return [
+    // Only allow CORS on API routes — never apply globally unless required
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+
+    'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+
+    // GOOD — explicit allowed origins
+    'allowed_origins' => [
+        'https://app.example.com',
+        'https://admin.example.com',
+    ],
+
+    // BAD — wildcard allows any origin (acceptable only for public APIs)
+    // 'allowed_origins' => ['*'],
+
+    'allowed_origins_patterns' => [],
+
+    'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+
+    // Expose only headers the frontend needs
+    'exposed_headers' => [],
+
+    // Whether to include cookies/auth headers in cross-origin requests
+    'supports_credentials' => true,
+
+    // Cache pre-flight responses (seconds) — reduces OPTIONS requests
+    'max_age' => 7200,
+];
+```
+
+### SPA + Sanctum CORS Flow
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+final class ValidateCorsOrigin
+{
+    /** @var list<string> */
+    private const array ALLOWED_ORIGINS = [
+        'https://app.example.com',
+        'https://staging.example.com',
+    ];
+
+    public function handle(Request $request, Closure $next): Response
+    {
+        $origin = $request->headers->get('Origin');
+
+        if ($origin !== null && ! in_array($origin, self::ALLOWED_ORIGINS, true)) {
+            abort(403, 'Origin not allowed.');
+        }
+
+        return $next($request);
+    }
+}
+
+// In Sanctum config — match CORS allowed origins
+// config/sanctum.php
+// 'stateful' => ['app.example.com', 'staging.example.com'],
+```
+
+### CORS Rules
+
+- **Never use wildcard `*` origins in production** — always list explicit domains
+- **Set `supports_credentials` to `true`** only when using cookie-based auth (Sanctum SPA)
+- **Limit `paths`** to only the routes that need cross-origin access
+- **Cache pre-flight responses** with `max_age` to reduce OPTIONS request overhead
+- **Match Sanctum `stateful` domains** to your CORS `allowed_origins`
+- Keep CORS configuration in `config/cors.php` — do not set headers manually
+- See the **laravel-api** skill for API-specific CORS patterns with Sanctum
+
+## Content Security Policy (CSP)
+
+CSP headers prevent inline script injection, unauthorized resource loading, and other XSS vectors.
+
+### Building a CSP Header
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
+
+final class ContentSecurityPolicy
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $nonce = Str::random(32);
+
+        // Share nonce with views for inline scripts
+        view()->share('cspNonce', $nonce);
+
+        $response = $next($request);
+
+        $policy = implode('; ', [
+            "default-src 'self'",
+            "script-src 'self' 'nonce-{$nonce}'",
+            "style-src 'self' 'nonce-{$nonce}'",
+            "img-src 'self' data: https:",
+            "font-src 'self'",
+            "connect-src 'self'",
+            "frame-ancestors 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+        ]);
+
+        $response->headers->set('Content-Security-Policy', $policy);
+
+        return $response;
+    }
+}
+```
+
+### Nonce-Based Inline Scripts in Blade
+
+```html
+{{-- Use the shared nonce for inline scripts --}}
+<script nonce="{{ $cspNonce }}">
+    document.addEventListener('DOMContentLoaded', function () {
+        // Safe inline script — allowed by CSP nonce
+    });
+</script>
+```
+
+### Using spatie/laravel-csp Package
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Support\Csp;
+
+use Spatie\Csp\Directive;
+use Spatie\Csp\Keyword;
+use Spatie\Csp\Policies\Policy;
+
+final class AppCspPolicy extends Policy
+{
+    public function configure(): void
+    {
+        $this
+            ->addDirective(Directive::DEFAULT, Keyword::SELF)
+            ->addDirective(Directive::SCRIPT, Keyword::SELF)
+            ->addNonceForDirective(Directive::SCRIPT)
+            ->addDirective(Directive::STYLE, Keyword::SELF)
+            ->addNonceForDirective(Directive::STYLE)
+            ->addDirective(Directive::IMG, [Keyword::SELF, 'data:', 'https:'])
+            ->addDirective(Directive::FONT, Keyword::SELF)
+            ->addDirective(Directive::CONNECT, Keyword::SELF)
+            ->addDirective(Directive::FRAME_ANCESTORS, Keyword::NONE)
+            ->addDirective(Directive::BASE, Keyword::SELF)
+            ->addDirective(Directive::FORM_ACTION, Keyword::SELF);
+    }
+}
+
+// Register in config/csp.php:
+// 'policy' => App\Support\Csp\AppCspPolicy::class,
+// 'report_only_policy' => App\Support\Csp\AppCspPolicy::class, // Use for testing
+```
+
+### CSP Rules
+
+- **Never use `'unsafe-inline'` or `'unsafe-eval'`** — they defeat the purpose of CSP
+- **Use nonces for inline scripts** — generate a unique nonce per request
+- **Start with report-only mode** (`Content-Security-Policy-Report-Only`) to test without breaking pages
+- **Use `frame-ancestors 'none'`** to prevent clickjacking (replaces `X-Frame-Options`)
+- Prefer the `spatie/laravel-csp` package for maintainable, testable policies
+- Combine CSP with the Security Headers middleware defined earlier in this skill
+
+## Signed URLs
+
+Use signed URLs to grant time-limited, tamper-proof access to specific routes without authentication.
+
+### Generating Signed URLs
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Notifications;
+
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
+
+final class VerifyEmailNotification extends Notification
+{
+    public function toMail(object $notifiable): MailMessage
+    {
+        // Temporary signed URL — expires after 60 minutes
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())],
+        );
+
+        return (new MailMessage())
+            ->subject('Verify Your Email Address')
+            ->action('Verify Email', $verificationUrl)
+            ->line('This link expires in 60 minutes.');
+    }
+}
+```
+
+### Verifying Signed URLs in Controllers
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers;
+
+use App\Models\Document;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+final class SecureDownloadController extends Controller
+{
+    public function download(Request $request, Document $document): StreamedResponse
+    {
+        // Verify the signed URL — aborts with 403 if invalid or expired
+        if (! $request->hasValidSignature()) {
+            abort(403, 'Invalid or expired download link.');
+        }
+
+        return response()->streamDownload(
+            fn () => echo file_get_contents(storage_path("app/private/{$document->path}")),
+            $document->filename,
+        );
+    }
+
+    public function generateLink(Document $document): string
+    {
+        // Permanent signed URL (no expiration)
+        return URL::signedRoute('documents.download', ['document' => $document->id]);
+    }
+}
+
+// Route definition with signed middleware
+// Route::get('download/{document}', [SecureDownloadController::class, 'download'])
+//     ->name('documents.download')
+//     ->middleware('signed');
+```
+
+### Unsubscribe Link Example
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\URL;
+
+// Generate an unsubscribe link that doesn't require login
+$unsubscribeUrl = URL::temporarySignedRoute(
+    'notifications.unsubscribe',
+    now()->addDays(30),
+    ['user' => $user->id, 'type' => 'marketing'],
+);
+```
+
+### Signed URL Rules
+
+- **Prefer `temporarySignedRoute()` over `signedRoute()`** — always set an expiration
+- **Use the `signed` middleware** on routes that accept signed URLs for automatic validation
+- **Never embed sensitive data in URL parameters** — use opaque identifiers (IDs, hashes)
+- Use signed URLs for email verification, file downloads, unsubscribe links, and magic login links
+- Signed URLs depend on `APP_KEY` — rotating the key invalidates all existing signed URLs
+- See the **laravel-api** skill for signed URL patterns in API responses
+
+## Dependency Security Auditing
+
+Regularly audit Composer dependencies for known vulnerabilities (CVEs) and keep them up to date.
+
+### Running Composer Audit
+
+```bash
+# Check for known security vulnerabilities in installed packages
+composer audit
+
+# Output as JSON for CI/CD parsing
+composer audit --format=json
+
+# Check only direct dependencies (not dev)
+composer audit --no-dev
+```
+
+### Automating in CI/CD
+
+```yaml
+# Example GitHub Actions step — see laravel-deployment skill for full CI/CD setup
+- name: Security audit
+  run: |
+    composer audit --format=json --no-interaction
+    # Fail the pipeline if vulnerabilities are found
+```
+
+### Handling Vulnerabilities
+
+```bash
+# Update a specific package to its latest secure version
+composer update vendor/package-name --with-dependencies
+
+# Show outdated packages
+composer outdated --direct
+
+# Check why a vulnerable package is installed
+composer why vendor/vulnerable-package
+```
+
+### Dependency Auditing Rules
+
+- **Run `composer audit` in every CI/CD pipeline** — fail the build on known CVEs
+- **Keep dependencies up to date** — run `composer outdated --direct` regularly
+- **Pin major versions** in `composer.json` — use `^` for minor/patch updates only
+- **Review changelogs before major updates** — check for breaking changes
+- **Never ignore security advisories** — patch or replace vulnerable packages immediately
+- Automate dependency update PRs with Dependabot or Renovate
+- See the **laravel-deployment** skill for CI/CD pipeline configuration with security checks
